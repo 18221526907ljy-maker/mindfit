@@ -133,7 +133,8 @@
 
         <!-- 功能卡片网格 -->
         <div class="grid grid-cols-2 gap-4 mb-8">
-          <!-- 身心测评 -->
+          
+         <!-- 身心测评入口 -->
 <div class="feature-card glass rounded-xl p-5 card-shadow flex flex-col items-center justify-center hover-lift ripple cursor-pointer"
      data-target="assessHubPage">
   <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center mb-3">
@@ -142,6 +143,7 @@
   <h3 class="text-base font-medium text-center">身心测评</h3>
   <p class="text-xs text-gray-500 mt-1">轻测评 2 分钟 / 专业测评 5–8 分钟</p>
 </div>
+
 
 
           <!-- 自动思维记录 -->
@@ -358,16 +360,23 @@ const PRO_Q = [
   // 专业测评题目数组（30题）
 ];
 
-let assessMode = 'light';  // 默认选择轻测评
+let assessMode = 'light'; // 默认模式为轻测评
 
-// 获取当前选择的题库
-const getQuestions = () => (assessMode === 'light' ? LIGHT_Q : PRO_Q);
+// 切换测评模式
+document.getElementById("assessModeLight").addEventListener("click", () => {
+  assessMode = 'light';
+  renderAssessment();
+});
+document.getElementById("assessModePro").addEventListener("click", () => {
+  assessMode = 'pro';
+  renderAssessment();
+});
 
-// 渲染题库
+// 渲染测评题目
 function renderAssessment() {
   const qList = document.getElementById("qList");
-  const qs = getQuestions();
-  qList.innerHTML = qs.map((q, i) => {
+  const questions = assessMode === 'light' ? LIGHT_Q : PRO_Q;
+  qList.innerHTML = questions.map((q, i) => {
     return `<div>
       <label class="block text-sm text-gray-700 mb-1">${i + 1}. ${q}</label>
       <input type="range" min="1" max="5" value="3" class="w-full accent-primary assess-item" data-idx="${i}">
@@ -375,16 +384,6 @@ function renderAssessment() {
     </div>`;
   }).join("");
 }
-
-// 切换测评模式
-document.getElementById("assessModeLight").addEventListener("click", ()=>{
-  assessMode = 'light';
-  renderAssessment();
-});
-document.getElementById("assessModePro").addEventListener("click", ()=>{
-  assessMode = 'pro';
-  renderAssessment();
-});
 
 
     <!-- 自动思维记录 -->

@@ -133,13 +133,16 @@
 
         <!-- 功能卡片网格 -->
         <div class="grid grid-cols-2 gap-4 mb-8">
-          <!-- 轻测评 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="assessmentPage">
-            <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center mb-3">
-              <i class="fa fa-question-circle text-pink-500 text-xl"></i>
-            </div>
-            <h3 class="text-base font-medium text-center">身心轻测评</h3>
-          </div>
+          <!-- 身心测评 -->
+<div class="feature-card glass rounded-xl p-5 card-shadow flex flex-col items-center justify-center hover-lift ripple cursor-pointer"
+     data-target="assessHubPage">
+  <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center mb-3">
+    <i class="fa fa-question-circle text-pink-500 text-xl"></i>
+  </div>
+  <h3 class="text-base font-medium text-center">身心测评</h3>
+  <p class="text-xs text-gray-500 mt-1">轻测评 2 分钟 / 专业测评 5–8 分钟</p>
+</div>
+
 
           <!-- 自动思维记录 -->
           <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="thoughtRecordPage">
@@ -209,13 +212,115 @@
       </div>
     </section>
 
-    <!-- 身心轻测评 -->
-    <section id="assessmentPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">身心轻测评</h2>
-          <p class="text-gray-500 text-sm">9 题 5 分量表 + BMI & 主观感受，生成个性化建议</p>
+   <!-- 身心测评中心（选择轻测评/专业测评） -->
+<section id="assessHubPage" class="page hidden">
+  <div class="px-4 py-6">
+    <h2 class="text-xl font-bold mb-2">身心测评</h2>
+    <p class="text-gray-500 text-sm mb-4">选择你要进行的测评类型</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="glass rounded-xl p-5 card-shadow">
+        <div class="flex items-center mb-3">
+          <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mr-3"><i class="fa fa-bolt text-pink-500"></i></div>
+          <div>
+            <p class="font-medium">轻测评（约 2 分钟）</p>
+            <p class="text-xs text-gray-500">身体焦虑快速筛查 + 自助准备度</p>
+          </div>
         </div>
+        <button id="startLightBtn" class="w-full py-2 bg-pink-500 text-white rounded-lg font-medium ripple">开始轻测评</button>
+      </div>
+      <div class="glass rounded-xl p-5 card-shadow">
+        <div class="flex items-center mb-3">
+          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3"><i class="fa fa-bar-chart text-blue-500"></i></div>
+          <div>
+            <p class="font-medium">专业测评（约 5–8 分钟）</p>
+            <p class="text-xs text-gray-500">四维度画像 + 个性化小计划</p>
+          </div>
+        </div>
+        <button id="startProBtn" class="w-full py-2 border border-blue-500 text-blue-600 rounded-lg font-medium ripple">开始专业测评</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 轻测评页面：9题题库 -->
+<section id="lightAssessPage" class="page hidden">
+  <div class="px-4 py-6">
+    <h2 class="text-xl font-bold mb-1">轻测评</h2>
+    <p class="text-gray-500 text-sm mb-4">请按最近一段时间的真实感受作答（1=从不，5=总是）</p>
+
+    <!-- 可选基础信息 -->
+    <div class="bg-white rounded-xl p-4 card-shadow mb-4">
+      <p class="text-sm text-gray-600">（可选）基础信息：</p>
+      <div class="grid grid-cols-2 gap-3 mt-2">
+        <input id="lightHeight" type="number" class="p-2 border rounded-lg" placeholder="身高(cm)">
+        <input id="lightWeight" type="number" class="p-2 border rounded-lg" placeholder="体重(kg)">
+      </div>
+      <select id="lightFeel" class="p-2 border rounded-lg w-full mt-2">
+        <option value="">此刻身体/情绪主观感受</option>
+        <option>舒适</option><option>紧绷</option><option>疲惫</option><option>不自信</option>
+      </select>
+      <p id="lightBMIText" class="text-xs text-gray-500 mt-1"></p>
+    </div>
+
+    <!-- 题目容器 -->
+    <div id="lightQBox" class="space-y-4"></div>
+
+    <div class="mt-5 flex gap-3">
+      <button id="lightSubmit" class="flex-1 py-2 bg-pink-500 text-white rounded-lg font-medium ripple">提交并生成建议</button>
+      <button id="lightReset" class="px-4 py-2 border rounded-lg text-gray-600">重置</button>
+    </div>
+
+    <!-- 结果卡 -->
+    <div id="lightResult" class="hidden mt-5 bg-white rounded-xl p-4 card-shadow">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold">轻测评结果</h3>
+        <div class="space-x-3">
+          <button id="lightCSV" class="text-blue-600 text-sm"><i class="fa fa-table mr-1"></i>导出 CSV</button>
+          <button id="lightPDF" class="text-blue-600 text-sm"><i class="fa fa-file-pdf-o mr-1"></i>导出 PDF</button>
+        </div>
+      </div>
+      <div id="lightSummary" class="text-sm text-gray-700 mt-2"></div>
+      <ul id="lightAdvice" class="list-disc pl-5 mt-2 space-y-1 text-sm"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 专业测评页面：30题四维度 -->
+<section id="proAssessPage" class="page hidden">
+  <div class="px-4 py-6">
+    <h2 class="text-xl font-bold mb-1">专业测评</h2>
+    <p class="text-gray-500 text-sm mb-4">请按最近一段时间的真实感受作答（每题 1–5）</p>
+
+    <div id="proQBox" class="space-y-4"></div>
+
+    <div class="mt-5 flex gap-3">
+      <button id="proSubmit" class="flex-1 py-2 bg-blue-500 text-white rounded-lg font-medium ripple">提交并生成报告</button>
+      <button id="proReset" class="px-4 py-2 border rounded-lg text-gray-600">重置</button>
+    </div>
+
+    <div id="proResult" class="hidden mt-5 bg-white rounded-xl p-4 card-shadow">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold">专业测评报告</h3>
+        <div class="space-x-3">
+          <button id="proCSV" class="text-blue-600 text-sm"><i class="fa fa-table mr-1"></i>导出 CSV</button>
+          <button id="proPDF" class="text-blue-600 text-sm"><i class="fa fa-file-pdf-o mr-1"></i>导出 PDF</button>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4 mt-3">
+        <div class="bg-gray-50 rounded-lg p-3"><canvas id="proChart" height="180"></canvas></div>
+        <div class="text-sm">
+          <div id="proOverall" class="mb-2"></div>
+          <div id="proBadges" class="space-y-2"></div>
+        </div>
+      </div>
+      <div class="mt-3">
+        <h4 class="font-semibold mb-1">为你生成的小计划</h4>
+        <ul id="proPlan" class="list-disc pl-5 space-y-1 text-sm"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 
         <!-- BMI + 主观感受 -->
         <div class="bg-white rounded-xl p-5 card-shadow mb-6">
@@ -245,22 +350,42 @@
           </div>
         </div>
 
-        <!-- 9题量表 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">9 题量表（1=从不，5=总是）</h3>
-          <div id="qList" class="space-y-3"></div>
-        </div>
+       // 渲染测评题库（根据当前模式选择题目）
+const LIGHT_Q = [
+  // 轻测评题目数组（Q1~Q8 计入总分，Q9为准备度）
+];
+const PRO_Q = [
+  // 专业测评题目数组（30题）
+];
 
-        <!-- 结果 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <button id="btnAssess" class="btn-primary"><i class="fa fa-check mr-2"></i>提交并生成建议</button>
-          <div id="assessResult" class="hidden mt-4 border border-gray-100 rounded-lg p-4 bg-gray-50">
-            <p class="text-sm text-gray-600 mb-2">建议 & 今日小任务：</p>
-            <ul id="adviceList" class="list-disc pl-5 space-y-1 text-sm"></ul>
-          </div>
-        </div>
-      </div>
-    </section>
+let assessMode = 'light';  // 默认选择轻测评
+
+// 获取当前选择的题库
+const getQuestions = () => (assessMode === 'light' ? LIGHT_Q : PRO_Q);
+
+// 渲染题库
+function renderAssessment() {
+  const qList = document.getElementById("qList");
+  const qs = getQuestions();
+  qList.innerHTML = qs.map((q, i) => {
+    return `<div>
+      <label class="block text-sm text-gray-700 mb-1">${i + 1}. ${q}</label>
+      <input type="range" min="1" max="5" value="3" class="w-full accent-primary assess-item" data-idx="${i}">
+      <div class="flex justify-between text-xs text-gray-400"><span>1</span><span>5</span></div>
+    </div>`;
+  }).join("");
+}
+
+// 切换测评模式
+document.getElementById("assessModeLight").addEventListener("click", ()=>{
+  assessMode = 'light';
+  renderAssessment();
+});
+document.getElementById("assessModePro").addEventListener("click", ()=>{
+  assessMode = 'pro';
+  renderAssessment();
+});
+
 
     <!-- 自动思维记录 -->
     <section id="thoughtRecordPage" class="page hidden">

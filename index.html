@@ -133,18 +133,13 @@
 
         <!-- 功能卡片网格 -->
         <div class="grid grid-cols-2 gap-4 mb-8">
-          
-       <!-- 身心测评 -->
-<div class="feature-card glass rounded-xl p-5 card-shadow flex flex-col items-center justify-center hover-lift ripple cursor-pointer"
-     data-target="assessHubPage">
-  <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center mb-3">
-    <i class="fa fa-question-circle text-pink-500 text-xl"></i>
-  </div>
-  <h3 class="text-base font-medium text-center">身心测评</h3>
-  <p class="text-xs text-gray-500 mt-1">轻测评 2 分钟 / 专业测评 5–8 分钟</p>
-</div>
-
-
+          <!-- 轻测评 -->
+          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="assessmentPage">
+            <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center mb-3">
+              <i class="fa fa-question-circle text-pink-500 text-xl"></i>
+            </div>
+            <h3 class="text-base font-medium text-center">身心轻测评</h3>
+          </div>
 
           <!-- 自动思维记录 -->
           <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="thoughtRecordPage">
@@ -214,115 +209,13 @@
       </div>
     </section>
 
-   <!-- 身心测评中心（选择轻测评/专业测评） -->
-<section id="assessHubPage" class="page hidden">
-  <div class="px-4 py-6">
-    <h2 class="text-xl font-bold mb-2">身心测评</h2>
-    <p class="text-gray-500 text-sm mb-4">选择你要进行的测评类型</p>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="glass rounded-xl p-5 card-shadow">
-        <div class="flex items-center mb-3">
-          <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mr-3"><i class="fa fa-bolt text-pink-500"></i></div>
-          <div>
-            <p class="font-medium">轻测评（约 2 分钟）</p>
-            <p class="text-xs text-gray-500">身体焦虑快速筛查 + 自助准备度</p>
-          </div>
+    <!-- 身心轻测评 -->
+    <section id="assessmentPage" class="page hidden">
+      <div class="px-4 py-6">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold mb-2">身心轻测评</h2>
+          <p class="text-gray-500 text-sm">9 题 5 分量表 + BMI & 主观感受，生成个性化建议</p>
         </div>
-        <button id="startLightBtn" class="w-full py-2 bg-pink-500 text-white rounded-lg font-medium ripple">开始轻测评</button>
-      </div>
-      <div class="glass rounded-xl p-5 card-shadow">
-        <div class="flex items-center mb-3">
-          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3"><i class="fa fa-bar-chart text-blue-500"></i></div>
-          <div>
-            <p class="font-medium">专业测评（约 5–8 分钟）</p>
-            <p class="text-xs text-gray-500">四维度画像 + 个性化小计划</p>
-          </div>
-        </div>
-        <button id="startProBtn" class="w-full py-2 border border-blue-500 text-blue-600 rounded-lg font-medium ripple">开始专业测评</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 轻测评页面：9题题库 -->
-<section id="lightAssessPage" class="page hidden">
-  <div class="px-4 py-6">
-    <h2 class="text-xl font-bold mb-1">轻测评</h2>
-    <p class="text-gray-500 text-sm mb-4">请按最近一段时间的真实感受作答（1=从不，5=总是）</p>
-
-    <!-- 可选基础信息 -->
-    <div class="bg-white rounded-xl p-4 card-shadow mb-4">
-      <p class="text-sm text-gray-600">（可选）基础信息：</p>
-      <div class="grid grid-cols-2 gap-3 mt-2">
-        <input id="lightHeight" type="number" class="p-2 border rounded-lg" placeholder="身高(cm)">
-        <input id="lightWeight" type="number" class="p-2 border rounded-lg" placeholder="体重(kg)">
-      </div>
-      <select id="lightFeel" class="p-2 border rounded-lg w-full mt-2">
-        <option value="">此刻身体/情绪主观感受</option>
-        <option>舒适</option><option>紧绷</option><option>疲惫</option><option>不自信</option>
-      </select>
-      <p id="lightBMIText" class="text-xs text-gray-500 mt-1"></p>
-    </div>
-
-    <!-- 题目容器 -->
-    <div id="lightQBox" class="space-y-4"></div>
-
-    <div class="mt-5 flex gap-3">
-      <button id="lightSubmit" class="flex-1 py-2 bg-pink-500 text-white rounded-lg font-medium ripple">提交并生成建议</button>
-      <button id="lightReset" class="px-4 py-2 border rounded-lg text-gray-600">重置</button>
-    </div>
-
-    <!-- 结果卡 -->
-    <div id="lightResult" class="hidden mt-5 bg-white rounded-xl p-4 card-shadow">
-      <div class="flex items-center justify-between">
-        <h3 class="font-semibold">轻测评结果</h3>
-        <div class="space-x-3">
-          <button id="lightCSV" class="text-blue-600 text-sm"><i class="fa fa-table mr-1"></i>导出 CSV</button>
-          <button id="lightPDF" class="text-blue-600 text-sm"><i class="fa fa-file-pdf-o mr-1"></i>导出 PDF</button>
-        </div>
-      </div>
-      <div id="lightSummary" class="text-sm text-gray-700 mt-2"></div>
-      <ul id="lightAdvice" class="list-disc pl-5 mt-2 space-y-1 text-sm"></ul>
-    </div>
-  </div>
-</section>
-
-<!-- 专业测评页面：30题四维度 -->
-<section id="proAssessPage" class="page hidden">
-  <div class="px-4 py-6">
-    <h2 class="text-xl font-bold mb-1">专业测评</h2>
-    <p class="text-gray-500 text-sm mb-4">请按最近一段时间的真实感受作答（每题 1–5）</p>
-
-    <div id="proQBox" class="space-y-4"></div>
-
-    <div class="mt-5 flex gap-3">
-      <button id="proSubmit" class="flex-1 py-2 bg-blue-500 text-white rounded-lg font-medium ripple">提交并生成报告</button>
-      <button id="proReset" class="px-4 py-2 border rounded-lg text-gray-600">重置</button>
-    </div>
-
-    <div id="proResult" class="hidden mt-5 bg-white rounded-xl p-4 card-shadow">
-      <div class="flex items-center justify-between">
-        <h3 class="font-semibold">专业测评报告</h3>
-        <div class="space-x-3">
-          <button id="proCSV" class="text-blue-600 text-sm"><i class="fa fa-table mr-1"></i>导出 CSV</button>
-          <button id="proPDF" class="text-blue-600 text-sm"><i class="fa fa-file-pdf-o mr-1"></i>导出 PDF</button>
-        </div>
-      </div>
-      <div class="grid md:grid-cols-2 gap-4 mt-3">
-        <div class="bg-gray-50 rounded-lg p-3"><canvas id="proChart" height="180"></canvas></div>
-        <div class="text-sm">
-          <div id="proOverall" class="mb-2"></div>
-          <div id="proBadges" class="space-y-2"></div>
-        </div>
-      </div>
-      <div class="mt-3">
-        <h4 class="font-semibold mb-1">为你生成的小计划</h4>
-        <ul id="proPlan" class="list-disc pl-5 space-y-1 text-sm"></ul>
-      </div>
-    </div>
-  </div>
-</section>
-
 
         <!-- BMI + 主观感受 -->
         <div class="bg-white rounded-xl p-5 card-shadow mb-6">
@@ -352,39 +245,22 @@
           </div>
         </div>
 
-       // 渲染测评题库（根据当前模式选择题目）
-const LIGHT_Q = [
-  // 轻测评题目数组（Q1~Q8 计入总分，Q9为准备度）
-];
-const PRO_Q = [
-  // 专业测评题目数组（30题）
-];
+        <!-- 9题量表 -->
+        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
+          <h3 class="text-lg font-semibold mb-4">9 题量表（1=从不，5=总是）</h3>
+          <div id="qList" class="space-y-3"></div>
+        </div>
 
-let assessMode = 'light'; // 默认模式为轻测评
-
-// 切换测评模式
-document.getElementById("assessModeLight").addEventListener("click", () => {
-  assessMode = 'light';
-  renderAssessment();
-});
-document.getElementById("assessModePro").addEventListener("click", () => {
-  assessMode = 'pro';
-  renderAssessment();
-});
-
-// 渲染测评题目
-function renderAssessment() {
-  const qList = document.getElementById("qList");
-  const questions = assessMode === 'light' ? LIGHT_Q : PRO_Q;
-  qList.innerHTML = questions.map((q, i) => {
-    return `<div>
-      <label class="block text-sm text-gray-700 mb-1">${i + 1}. ${q}</label>
-      <input type="range" min="1" max="5" value="3" class="w-full accent-primary assess-item" data-idx="${i}">
-      <div class="flex justify-between text-xs text-gray-400"><span>1</span><span>5</span></div>
-    </div>`;
-  }).join("");
-}
-
+        <!-- 结果 -->
+        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
+          <button id="btnAssess" class="btn-primary"><i class="fa fa-check mr-2"></i>提交并生成建议</button>
+          <div id="assessResult" class="hidden mt-4 border border-gray-100 rounded-lg p-4 bg-gray-50">
+            <p class="text-sm text-gray-600 mb-2">建议 & 今日小任务：</p>
+            <ul id="adviceList" class="list-disc pl-5 space-y-1 text-sm"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- 自动思维记录 -->
     <section id="thoughtRecordPage" class="page hidden">
@@ -949,192 +825,19 @@ function renderAssessment() {
       });
 
       /*****************
-       /******** 轻测评（9题，Q1~Q8=焦虑总分，Q9=准备度） ********/
-const LIGHT_Q = [
-  "照镜子或翻看照片时，我会特别关注自己的某些身体部位。",
-  "在社交平台上，我会不由自主地把自己和“好身材”照片相比。",
-  "吃完喜欢的食物后，我会感到后悔或愧疚。",
-  "如果对自己的外貌不满意，我会情绪低落或心情受到影响。",
-  "我会给自己制定严格的饮食或运动计划，若未完成会自责。",
-  "因为担心身材，我会避免拍照或参加社交活动。",
-  "我觉得“如果变得更好看，生活会更顺利”这类想法有一定道理。",
-  "我想摆脱这些焦虑想法，但不知道从哪里开始。",
-  "如果有简单可操作的心理自助练习（例如思维记录、情绪卡片等），我愿意尝试。（准备度）"
-];
-
-function renderLightQs(){
-  const box = document.getElementById('lightQBox');
-  if(!box || box.dataset.rendered==='1') return;
-  box.innerHTML = LIGHT_Q.map((q,i)=>`
-    <div class="bg-white rounded-xl p-4 card-shadow">
-      <div class="text-sm mb-2">${i+1}. ${q}</div>
-      <div class="grid grid-cols-5 gap-2 text-center text-xs">
-        ${[1,2,3,4,5].map(v=>`
-          <label class="border rounded-lg py-2">
-            <input type="radio" name="lq${i}" value="${v}" class="hidden">
-            <div>${v===1?"从不":v===2?"偶尔":v===3?"有时":v===4?"经常":"总是"}</div>
-          </label>`).join("")}
-      </div>
-    </div>`).join("");
-  box.dataset.rendered='1';
-
-  // 可选：BMI 提示
-  const bmiText = document.getElementById("lightBMIText");
-  const updateBMI=()=>{
-    const h=parseFloat(document.getElementById("lightHeight").value)||0;
-    const w=parseFloat(document.getElementById("lightWeight").value)||0;
-    if(!h||!w){ bmiText.textContent=""; return; }
-    const bmi=(w/Math.pow(h/100,2)).toFixed(1);
-    let tip="关注身体功能而非数字。";
-    if(bmi<18.5) tip="可能偏瘦，注意营养补充与温和活动。";
-    else if(bmi<24) tip="总体良好，保持均衡与觉察。";
-    else if(bmi<28) tip="建议循序渐进地调整饮食与活动。";
-    else tip="建议在专业指导下稳步管理与监测。";
-    bmiText.textContent=`BMI≈${bmi}，${tip}`;
-  };
-  document.getElementById("lightHeight").oninput=updateBMI;
-  document.getElementById("lightWeight").oninput=updateBMI;
-}
-
-document.getElementById('lightReset')?.addEventListener('click', ()=>{
-  document.querySelectorAll('#lightQBox input[type="radio"]').forEach(i=>i.checked=false);
-  document.getElementById('lightResult').classList.add('hidden');
-});
-
-document.getElementById('lightSubmit')?.addEventListener('click', ()=>{
-  const vals=[];
-  for(let i=0;i<LIGHT_Q.length;i++){
-    const sel=document.querySelector(`input[name="lq${i}"]:checked`);
-    if(!sel){ alert('还有题目未作答'); return; }
-    vals.push(Number(sel.value));
-  }
-  const total = vals.slice(0,8).reduce((a,b)=>a+b,0); // 8~40
-  const readiness = vals[8]; // 1~5
-
-  let level="", advice=[];
-  if(total<=18){ level="低水平"; advice.push("每日 1 次 2 分钟呼吸 + 1 条自我肯定语","波动时使用 5-4-3-2-1 五感觉察"); }
-  else if(total<=29){ level="需要关注"; advice.push("每日：4-2-6 呼吸×2 + 情绪命名×1","每周 2 次自动思维记录；必要时 1 次小型行为实验"); }
-  else { level="优先干预"; advice.push("本周 3 次自动思维记录（聚焦外貌想法）","优先：4-2-6 呼吸 + 五感觉察","从正念饮食开始修复饮食紧绷感"); }
-  if(readiness<=2) advice.unshift("从最小行动开始：60 秒呼吸 + 1 句自我肯定语");
-  else if(readiness===3) advice.unshift("加入每日打卡与情绪卡片练习");
-  else advice.unshift("今日即可开启：CBT 思维记录 + 行为实验（微步）");
-
-  // 渲染结果
-  document.getElementById('lightResult').classList.remove('hidden');
-  document.getElementById('lightSummary').innerHTML = `焦虑总分：<b>${total}</b>（8–40）｜分级：<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">${level}</span>｜准备度：<b>${readiness}</b>/5`;
-  document.getElementById('lightAdvice').innerHTML = advice.map(a=>`<li>${a}</li>`).join("");
-
-  // 导出
-  document.getElementById('lightCSV').onclick = ()=>{
-    const header=["时间","类型","总分","准备度","建议"];
-    const row=[new Date().toLocaleString(),"light",total,readiness,advice.join(" / ")];
-    const csv=[header,row].map(r=>r.map(x=>`"${(x+"").replace(/"/g,'""')}"`).join(",")).join("\n");
-    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
-    const a=document.createElement("a"); a.href=url; a.download="mindfit_light.csv"; a.click(); URL.revokeObjectURL(url);
-  };
-  document.getElementById('lightPDF').onclick = ()=>{
-    const html=document.getElementById('lightResult').innerHTML;
-    const w=window.open("","_blank"); w.document.write(`<html><head><title>轻测评报告</title></head><body>${html}</body></html>`); w.document.close(); w.print();
-  };
-});
-/******** 专业测评（30题，四维度） ********/
-const PRO_Q = [
-  "最近一周，您觉得自己的身体总体感觉如何？","您有多久没有好好休息、让身体放松？","您是否经常关注自己身体的舒适感或不适感？",
-  "您最近会主动为身体做些友好的事（如慢走、拉伸、晒太阳等）吗？","您觉得自己和身体的关系更像朋友还是“外貌评判者”？","过去一周，您觉得自己的活力/精力如何？",
-  "您会因为身体状态影响到心情吗？","最近一周，您是否经常感到焦虑或烦躁？","您是否容易因为琐事心情低落？",
-  "您最近会主动采取措施缓解情绪（如深呼吸、正念练习）吗？","您是否因外界评价/网络信息而感到自卑或压力大？","您觉得自己有情绪波动时，能觉察并接纳这些情绪吗？",
-  "您最近有没有明显的压力源（如学业、工作、家庭等）？","面对压力时，您会主动寻求支持还是自己消化？","最近一周，您的睡眠质量如何？",
-  "您是否经常对自己的外貌/体型感到不满？","您会在脑海中反复回想别人对您的评价吗？","您是否会放大身体上的细节缺陷？",
-  "当不顺利时，您会归因于自己的身体或外貌吗？","您是否尝试用积极、宽容的视角看待自己？","您觉得自己容易自责还是会自我鼓励？",
-  "您是否能接受“身体本来就多样，没有统一标准”这个理念？","您在面对消极想法时，能否停下来思考并做出积极调整？","最近一周，您有规律运动或活动身体吗？",
-  "您会强迫自己节食/锻炼以追求外貌目标吗？","您觉得自己饮食习惯更关注健康还是体型？","您最近是否有规律作息、保证睡眠？",
-  "您是否会尝试新的自我关怀行为（如冥想、放松、记录感受等）？","遇到身心困扰时，您更倾向于自我调节还是寻求外界帮助？","您是否相信身体的价值远不止外貌，更多在于陪伴和功能？"
-];
-
-// 维度映射（A 身体关怀 / B 情绪 / C 身体形象 / D 行为习惯），r=true 表示正向题反向计分
-const MAP = {
-  A:[{i:1,r:true},{i:2,r:true},{i:3,r:false},{i:4,r:true},{i:5,r:true},{i:6,r:true},{i:28,r:true}],
-  B:[{i:7,r:false},{i:8,r:false},{i:9,r:false},{i:10,r:true},{i:12,r:true},{i:13,r:false},{i:14,r:true},{i:29,r:true}],
-  C:[{i:11,r:false},{i:16,r:false},{i:17,r:false},{i:18,r:false},{i:19,r:false},{i:20,r:true},{i:21,r:true},{i:22,r:true},{i:23,r:true},{i:30,r:true}],
-  D:[{i:15,r:true},{i:24,r:true},{i:25,r:false},{i:26,r:true},{i:27,r:true}]
-};
-const labelMap = {A:"A 身体关怀", B:"B 情绪", C:"C 身体形象", D:"D 行为习惯"};
-
-function renderProQs(){
-  const box=document.getElementById('proQBox'); if(!box || box.dataset.rendered==='1') return;
-  box.innerHTML = PRO_Q.map((q,idx)=>`
-    <div class="bg-white rounded-xl p-4 card-shadow">
-      <div class="text-sm mb-2">${idx+1}. ${q}</div>
-      <div class="grid grid-cols-5 gap-2 text-center text-xs">
-        ${[1,2,3,4,5].map(v=>`
-          <label class="border rounded-lg py-2">
-            <input type="radio" name="pq${idx}" value="${v}" class="hidden">
-            <div>${v}</div>
-          </label>`).join("")}
-      </div>
-    </div>`).join("");
-  box.dataset.rendered='1';
-}
-
-const riskScore=(v,rev)=> rev? (6-v) : v; // 1~5 -> 风险 1~5
-const standardize=(sum,n)=> Math.round(((sum-1*n)/(4*n))*100); // 0~100
-const grade100=(s)=> s<=33?{label:"良好",cls:"bg-green-50 text-green-700"}: s<=66?{label:"需要练习",cls:"bg-yellow-50 text-yellow-700"}:{label:"优先关注",cls:"bg-red-50 text-red-700"};
-
-let radarRef=null;
-
-document.getElementById('proReset')?.addEventListener('click', ()=>{
-  document.querySelectorAll('#proQBox input[type="radio"]').forEach(i=>i.checked=false);
-  document.getElementById('proResult').classList.add('hidden');
-});
-
-document.getElementById('proSubmit')?.addEventListener('click', ()=>{
-  const vals=[];
-  for(let i=0;i<PRO_Q.length;i++){
-    const sel=document.querySelector(`input[name="pq${i}"]:checked`);
-    if(!sel){ alert('还有题目未作答'); return; }
-    vals.push(Number(sel.value));
-  }
-
-  const calc=(arr)=> arr.reduce((a,{i,r})=> a + riskScore(vals[i-1],r),0);
-  const A=calc(MAP.A), B=calc(MAP.B), C=calc(MAP.C), D=calc(MAP.D);
-  const A100=standardize(A, MAP.A.length), B100=standardize(B, MAP.B.length), C100=standardize(C, MAP.C.length), D100=standardize(D, MAP.D.length);
-  const overall=Math.round((A100+B100+C100+D100)/4);
-
-  const GA=grade100(A100), GB=grade100(B100), GC=grade100(C100), GD=grade100(D100), GO=grade100(overall);
-
-  // 个性化小计划（与你项目逻辑一致）
-  const plan=[];
-  if(A100>66) plan.push("连续 7 天“睡眠优先周”：固定就寝 + 3 分钟呼吸；本周 2 次身体扫描 5 分钟");
-  else if(A100>33) plan.push("每日 3 分钟冥想 + 晚间 30 分钟电子屏幕关闭；一周 2 次温和拉伸");
-  if(B100>66) plan.push("今日 1 次自动思维记录；本周 1 次小型行为实验；必要时考虑求助渠道");
-  else if(B100>33) plan.push("每日 4-2-6 呼吸×2 + 情绪命名×1；波动时使用五感觉察");
-  if(C100>66) plan.push("设计 1 个行为实验（如与信任的人共餐）；每周 3 次思维记录；减少镜前检查/社媒比较时长");
-  else if(C100>33) plan.push("本周 2 次思维记录（聚焦外貌想法）；“身体中立 3 步” + 3 条身体功能感恩");
-  if(D100>66) plan.push("停止惩罚式节食；采用盘子法与规律三餐；设置 7 天步行 5000 步挑战");
-  else if(D100>33) plan.push("每周 3 次 15 分钟轻运动；规律作息；饮食以“非限制、均衡”为原则");
-
-  // 渲染报告
-  document.getElementById('proResult').classList.remove('hidden');
-  document.getElementById('proOverall').innerHTML = `总评：<span class="px-2 py-0.5 rounded-full ${GO.cls}">${GO.label}</span>（综合 ${overall}/100）<div class="mt-1 text-xs text-gray-600">A:${A100}｜B:${B100}｜C:${C100}｜D:${D100}</div>`;
-  document.getElementById('proBadges').innerHTML = `
-    <div>A：<span class="px-2 py-0.5 rounded-full ${GA.cls}">${GA.label}</span></div>
-    <div>B：<span class="px-2 py-0.5 rounded-full ${GB.cls}">${GB.label}</span></div>
-    <div>C：<span class="px-2 py-0.5 rounded-full ${GC.cls}">${GC.label}</span></div>
-    <div>D：<span class="px-2 py-0.5 rounded-full ${GD.cls}">${GD.label}</span></div>
-  `;
-  document.getElementById('proPlan').innerHTML = plan.map(p=>`<li>${p}</li>`).join("");
-
-  // 雷达图（需要 head 里已有 chart.js；如果没有，请在 </head> 前加：<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>）
-  const ctx=document.getElementById('proChart');
-  if(radarRef) radarRef.destroy();
-  radarRef=new Chart(ctx,{type:'radar',data:{labels:[labelMap.A,labelMap.B,labelMap.C,labelMap.D],datasets:[{label:'风险（越高越需关注）',data:[A100,B100,C100,D100]}]},options:{responsive:true,scales:{r:{beginAtZero:true,max:100}},plugins:{legend:{display:false}}}});
-
-  // 导出
-  document.getElementById('proCSV').onclick = ()=>{
-    const header=["时间","类型","A","B","C","D","综合","计划"];
-    const row=[new Date().toLocaleString(),"pro",A100,B100,C100,D100,overall,plan.join(" / ")];
-    const csv=[header,row].map(r=>
-
+       * 轻测评（9题）
+       *****************/
+      const QUESTIONS = [
+        "我经常因为身材/外貌而感到焦虑",
+        "我会把自己和社交媒体上的“完美身材”比较",
+        "当控制饮食失败时，我会强烈自责",
+        "我会因为情绪而吃得过多或过少",
+        "我对自己的身体功能（而非外貌）感到满足",
+        "紧张时，我能通过呼吸/放松让自己好受一些",
+        "我能温柔地和自己说话（而不是苛责）",
+        "我愿意尝试小任务来改变一点点习惯",
+        "我能识别并命名当下的情绪",
+      ];
 
       function renderAssessment() {
         // BMI 文本
@@ -1783,4 +1486,5 @@ document.getElementById('proSubmit')?.addEventListener('click', ()=>{
   </script>
 </body>
 </html>
+
 

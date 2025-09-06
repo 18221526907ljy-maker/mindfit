@@ -4,2909 +4,1012 @@
   <meta charset="UTF-8" />
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
   />
   <title>MindFit - 身心焦虑自助工具</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
-    rel="stylesheet"
-  />
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#3B82F6",
-            secondary: "#10B981",
-            accent: "#8B5CF6",
-            neutral: "#F3F4F6",
-            dark: "#1F2937",
-            light: "#F9FAFB",
-          },
-          fontFamily: {
-            sans: ["PingFang SC", "Helvetica Neue", "Arial", "sans-serif"],
-          },
-        },
-      },
-    };
-  </script>
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .card-shadow {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      }
-      .transition-smooth {
-        transition: all 0.3s ease;
-      }
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-      .text-balance {
-        text-wrap: balance;
-      }
-      .btn-primary {
-        @apply w-full py-3 bg-primary text-white rounded-lg font-medium flex items-center justify-center;
-      }
-      .badge {
-        @apply text-xs px-2 py-1 rounded-full;
-      }
-    }
+
+  <!-- 样式：采用静态构建版，减少运行时失败 -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- 图表（专业测评结果用） -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    .card-shadow{ box-shadow: 0 4px 20px rgba(0,0,0,.06); }
+    .btn{ @apply px-4 py-2 rounded-lg font-medium; }
+    .btn-primary{ background:#3B82F6;color:#fff; }
+    .btn-outline{ border:1px solid #3B82F6;color:#3B82F6; background:#fff; }
+    .badge{ font-size:12px; padding:4px 8px; border-radius:9999px; }
+    .page{ display:none; }
+    .page.active{ display:block; }
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); top:5rem; background:#111827; color:#fff; padding:.5rem .75rem; border-radius:.5rem; z-index:60; font-size:12px; display:none;}
   </style>
 </head>
 
-<body class="bg-gray-50 font-sans text-dark min-h-screen">
-  <!-- 顶部导航栏 -->
-  <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-    <div class="flex items-center justify-between px-4 py-3">
+<body class="bg-gray-50 text-gray-900">
+  <!-- 顶部栏 -->
+  <header class="fixed top-0 left-0 right-0 bg-white border-b z-50">
+    <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
       <div class="flex items-center">
-        <button id="backBtn" class="p-2 text-gray-500 hover:text-primary transition-smooth">
-          <i class="fa fa-arrow-left text-lg"></i>
-        </button>
-        <h1 id="pageTitle" class="text-xl font-medium ml-2">MindFit 身心管理</h1>
+        <button id="backBtn" class="mr-2 text-gray-500 hover:text-blue-600"><i class="fa fa-arrow-left"></i></button>
+        <h1 id="pageTitle" class="text-lg font-semibold">MindFit 身心管理</h1>
       </div>
-      <div class="flex items-center space-x-4">
-        <button class="p-2 text-gray-500 hover:text-primary transition-smooth" data-target="myRecordsPage">
-          <i class="fa fa-list-alt text-lg"></i>
-        </button>
-        <button class="p-2 text-gray-500 hover:text-primary transition-smooth" data-target="myBadgesPage">
-          <i class="fa fa-star-o text-lg"></i>
-        </button>
+      <div class="flex items-center space-x-3">
+        <button class="text-gray-600 hover:text-blue-600" data-goto="myRecords"><i class="fa fa-list-alt"></i></button>
+        <button class="text-gray-600 hover:text-blue-600" data-goto="badges"><i class="fa fa-star-o"></i></button>
       </div>
     </div>
   </header>
 
-  <!-- 提示 Toast -->
-  <div id="toast" class="fixed left-1/2 -translate-x-1/2 top-16 z-[60] hidden">
-    <div class="bg-gray-900 text-white text-sm px-3 py-2 rounded-md shadow-lg"></div>
-  </div>
+  <div id="toast" class="toast"></div>
 
-  <!-- 主内容区 -->
-  <main class="pt-16 pb-20 min-h-screen">
+  <main class="pt-16 pb-20 max-w-3xl mx-auto px-4">
     <!-- 首页 -->
-    <section id="homePage" class="page active">
-      <div class="px-4 py-6">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-[clamp(1.5rem,3vw,1.8rem)] font-bold">身心焦虑自助工具</h2>
+    <section id="home" class="page active">
+      <div class="mt-2">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-bold">身心焦虑自助工具</h2>
           <div class="flex items-center">
             <span class="text-sm text-gray-500 mr-2">我的进度</span>
             <div class="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div id="progressBar" class="h-full bg-primary rounded-full" style="width: 0%"></div>
+              <div id="progressBar" class="h-2 bg-blue-500 rounded-full" style="width:5%"></div>
             </div>
           </div>
         </div>
 
-        <!-- 功能卡片网格 -->
+        <!-- 功能入口 -->
         <div class="grid grid-cols-2 gap-4 mb-8">
-          <!-- 轻测评 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="assessmentPage">
-            <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center mb-3">
-              <i class="fa fa-question-circle text-pink-500 text-xl"></i>
+          <button class="bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition" data-goto="assessHub">
+            <div class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center mb-3">
+              <i class="fa fa-question-circle text-pink-500"></i>
             </div>
-            <h3 class="text-base font-medium text-center">身心轻测评</h3>
-          </div>
+            <p class="font-medium">身心测评</p>
+            <p class="text-xs text-gray-500">轻测评 2 分钟 / 专业测评 5-8 分钟</p>
+          </button>
 
-          <!-- 自动思维记录 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="thoughtRecordPage">
-            <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-              <i class="fa fa-pencil text-primary text-xl"></i>
+          <button class="bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition" data-goto="thought">
+            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+              <i class="fa fa-pencil text-blue-500"></i>
             </div>
-            <h3 class="text-base font-medium text-center">自动思维记录</h3>
-          </div>
+            <p class="font-medium">自动思维记录</p>
+            <p class="text-xs text-gray-500">识别并调整焦虑性想法</p>
+          </button>
 
-          <!-- 情绪调节卡片 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="emotionRegulationPage">
-            <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-3">
-              <i class="fa fa-heart-o text-secondary text-xl"></i>
+          <button class="bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition" data-goto="emotion">
+            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
+              <i class="fa fa-heart-o text-green-500"></i>
             </div>
-            <h3 class="text-base font-medium text-center">情绪调节卡片</h3>
-          </div>
+            <p class="font-medium">情绪调节卡片</p>
+            <p class="text-xs text-gray-500">呼吸/五感觉察/正念饮食</p>
+          </button>
 
-          <!-- 行为实验指南 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="behaviorExperimentPage">
-            <div class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center mb-3">
-              <i class="fa fa-flask text-accent text-xl"></i>
+          <button class="bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition" data-goto="experiment">
+            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-3">
+              <i class="fa fa-flask text-purple-500"></i>
             </div>
-            <h3 class="text-base font-medium text-center">行为实验指南</h3>
-          </div>
+            <p class="font-medium">行为实验指南</p>
+            <p class="text-xs text-gray-500">小步验证担忧信念</p>
+          </button>
 
-          <!-- 冥想/正念练习 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="mindfulnessPage">
-            <div class="w-14 h-14 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
-              <i class="fa fa-headphones text-yellow-500 text-xl"></i>
+          <button class="bg-white rounded-xl p-5 card-shadow hover:shadow-lg transition" data-goto="mindfulness">
+            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
+              <i class="fa fa-headphones text-yellow-500"></i>
             </div>
-            <h3 class="text-base font-medium text-center">冥想/正念练习</h3>
-          </div>
+            <p class="font-medium">冥想/正念练习</p>
+            <p class="text-xs text-gray-500">3-5 分钟引导</p>
+          </button>
         </div>
 
-        <!-- 最近记录（动态） -->
+        <!-- 最近记录 -->
         <div class="mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">最近记录</h3>
-            <button class="text-primary text-sm flex items-center" data-target="myRecordsPage">
-              查看全部 <i class="fa fa-angle-right ml-1"></i>
-            </button>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold">最近记录</h3>
+            <button class="text-blue-600 text-sm" data-goto="myRecords">查看全部</button>
           </div>
           <div id="recentList" class="space-y-3"></div>
         </div>
 
-        <!-- 新解锁徽章（动态） -->
-        <div id="badgeBanner" class="hidden bg-gradient-to-r from-primary to-accent rounded-xl p-5 text-white mb-6">
-          <div class="flex items-start justify-between">
-            <div>
-              <h3 class="text-lg font-semibold mb-1">恭喜解锁新徽章！</h3>
-              <p id="badgeBannerText" class="text-sm opacity-90 mb-3"></p>
-              <button class="bg-white text-primary text-sm px-3 py-1.5 rounded-full font-medium" data-target="myBadgesPage">
-                查看我的徽章
-              </button>
-            </div>
-            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-              <i class="fa fa-star text-2xl"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- 为你推荐（动态） -->
+        <!-- 为你推荐（基于最近情绪强度或测评） -->
         <div>
-          <h3 class="text-lg font-semibold mb-4">为你推荐</h3>
-          <div id="recommendList" class="space-y-4"></div>
+          <h3 class="font-semibold mb-3">为你推荐</h3>
+          <div id="recommendList" class="space-y-3"></div>
         </div>
       </div>
     </section>
 
-    <!-- 身心轻测评 -->
-    <section id="assessmentPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">身心轻测评</h2>
-          <p class="text-gray-500 text-sm">9 题 5 分量表 + BMI & 主观感受，生成个性化建议</p>
-        </div>
-
-        <!-- BMI + 主观感受 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">基础自评</h3>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">身高（cm）</label>
-              <input id="heightInput" type="number" min="80" max="230" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="例如 165" />
-            </div>
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">体重（kg）</label>
-              <input id="weightInput" type="number" min="20" max="250" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="例如 55" />
-            </div>
-          </div>
-          <div class="mt-3">
-            <label class="block text-sm text-gray-600 mb-1">此刻对身体的主观感受</label>
-            <select id="bodyFeel" class="w-full p-3 border border-gray-200 rounded-lg">
-              <option value="">请选择</option>
-              <option value="舒适">舒适</option>
-              <option value="紧绷">紧绷</option>
-              <option value="疲惫">疲惫</option>
-              <option value="不自信">不自信</option>
-            </select>
-          </div>
-          <div class="mt-3 text-sm text-gray-600">
-            <span id="bmiText" class="font-medium"></span>
-          </div>
-        </div>
-
-        <!-- 9题量表 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">9 题量表（1=从不，5=总是）</h3>
-          <div id="qList" class="space-y-3"></div>
-        </div>
-
-        <!-- 结果 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <button id="btnAssess" class="btn-primary"><i class="fa fa-check mr-2"></i>提交并生成建议</button>
-          <div id="assessResult" class="hidden mt-4 border border-gray-100 rounded-lg p-4 bg-gray-50">
-            <p class="text-sm text-gray-600 mb-2">建议 & 今日小任务：</p>
-            <ul id="adviceList" class="list-disc pl-5 space-y-1 text-sm"></ul>
-          </div>
-        </div>
+    <!-- 测评中心（选择轻测评/专业测评） -->
+    <section id="assessHub" class="page">
+      <div class="mb-6">
+        <h2 class="text-xl font-bold mb-1">身心测评</h2>
+        <p class="text-sm text-gray-500">选择你想进行的测评类型</p>
       </div>
-    </section>
-
-    <!-- 自动思维记录 -->
-    <section id="thoughtRecordPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">自动思维记录</h2>
-          <p class="text-gray-500 text-sm">记录并分析你的想法与情绪反应（聚焦身材/自我评价/社交媒体等）</p>
-        </div>
-
-        <!-- 捕捉 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">捕捉</h3>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">情境</label>
-            <select id="trContext" class="w-full p-3 border border-gray-200 rounded-lg">
-              <option value="">请选择或输入情境</option>
-              <option>外貌被评价</option>
-              <option>社交媒体对比</option>
-              <option>体重波动</option>
-              <option>穿衣不自信</option>
-              <option>饮食控制失控</option>
-              <option>自我怀疑</option>
-              <option>家庭沟通</option>
-              <option>其他（请在下方输入）</option>
-            </select>
-            <input id="trContextCustom" type="text" placeholder="如选择'其他'，请在此输入具体情境" class="w-full mt-2 p-3 border border-gray-200 rounded-lg" />
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">当时的想法</label>
-            <textarea id="trThought" placeholder="请描述你当时的想法..." rows="4" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">证据（支持/反对）</label>
-            <textarea id="trEvidence" placeholder="有没有证据支持或反驳这个想法？" rows="3" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <div class="">
-            <div class="flex items-center justify-between mb-2">
-              <label class="block text-sm font-medium text-gray-700">情绪强度</label>
-              <span id="emotionScore" class="text-primary font-semibold">5</span>
-            </div>
-            <input id="trEmotion" type="range" min="1" max="10" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" oninput="document.getElementById('emotionScore').textContent = this.value" />
-            <div class="flex justify-between text-xs text-gray-500 mt-1">
-              <span>轻微</span><span>中等</span><span>强烈</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 操作 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6 space-y-3">
-          <button id="btnSaveTR" class="btn-primary"><i class="fa fa-save mr-2"></i>保存记录</button>
-          <div class="grid grid-cols-2 gap-3">
-            <button id="btnExportCSV" class="py-2 border border-primary text-primary rounded-lg font-medium text-sm"><i class="fa fa-table mr-1"></i>导出 CSV</button>
-            <button id="btnPrint" class="py-2 border border-gray-300 text-gray-700 rounded-lg font-medium text-sm"><i class="fa fa-file-pdf-o mr-1"></i>打印为 PDF</button>
-          </div>
-        </div>
-
-        <!-- 示例输出（改为动态最近一次） -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-white rounded-xl p-5 card-shadow">
-          <h3 class="text-lg font-semibold mb-4">最近一次记录</h3>
-          <div id="trPreview" class="border border-gray-100 rounded-lg p-4 bg-gray-50 text-sm text-gray-700">
-            暂无记录，保存后会显示预览。
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 情绪调节卡片 -->
-    <section id="emotionRegulationPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">情绪调节卡片</h2>
-          <p class="text-gray-500 text-sm">通过简单练习，缓解焦虑、重获平衡</p>
-        </div>
-
-        <!-- 轮播容器 -->
-        <div class="relative mb-8">
-          <div class="carousel-container overflow-x-auto scrollbar-hide pb-4">
-            <div class="carousel-track flex space-x-4 min-w-max px-1">
-              <!-- 卡片 1：深呼吸 -->
-              <div class="emotion-card bg-white rounded-xl overflow-hidden card-shadow w-72 flex-shrink-0" data-card="deepBreath">
-                <div class="h-36 bg-blue-50 relative">
-                  <img src="https://picsum.photos/300/200?random=13" alt="深呼吸练习" class="w-full h-full object-cover opacity-70" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
-                    <h3 class="text-white text-lg font-semibold p-4">深呼吸练习</h3>
-                  </div>
-                </div>
-                <div class="p-4">
-                  <p class="text-sm text-gray-600 mb-4">4-2-6 呼吸：吸气 4 秒 - 停 2 秒 - 呼气 6 秒，重复 5–10 次。</p>
-                  <button class="complete-btn w-full py-2 border border-primary text-primary rounded-lg font-medium text-sm transition-smooth hover:bg-primary hover:text-white">
-                    标记完成
-                  </button>
-                </div>
-              </div>
-
-              <!-- 卡片 2：五感觉察 -->
-              <div class="emotion-card bg-white rounded-xl overflow-hidden card-shadow w-72 flex-shrink-0 opacity-90" data-card="fiveSenses">
-                <div class="h-36 bg-green-50 relative">
-                  <img src="https://picsum.photos/300/200?random=14" alt="五感觉察练习" class="w-full h-full object-cover opacity-70" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
-                    <h3 class="text-white text-lg font-semibold p-4">五感觉察</h3>
-                  </div>
-                  <div class="absolute top-3 right-3 hidden done-sticker bg-green-500 text-white text-xs px-2 py-1 rounded-full">已完成</div>
-                </div>
-                <div class="p-4">
-                  <p class="text-sm text-gray-600 mb-4">说出你看到/摸到/听到/闻到/尝到的 5-4-3-2-1 样东西。</p>
-                  <button class="complete-btn w-full py-2 border border-primary text-primary rounded-lg font-medium text-sm transition-smooth hover:bg-primary hover:text-white">
-                    标记完成
-                  </button>
-                </div>
-              </div>
-
-              <!-- 卡片 3：正念饮食 -->
-              <div class="emotion-card bg-white rounded-xl overflow-hidden card-shadow w-72 flex-shrink-0" data-card="mindfulEating">
-                <div class="h-36 bg-yellow-50 relative">
-                  <img src="https://picsum.photos/300/200?random=15" alt="正念饮食练习" class="w-full h-full object-cover opacity-70" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
-                    <h3 class="text-white text-lg font-semibold p-4">正念饮食</h3>
-                  </div>
-                </div>
-                <div class="p-4">
-                  <p class="text-sm text-gray-600 mb-4">选一颗葡萄干或一小块食物，慢慢观察、嗅闻、品尝，细嚼慢咽。</p>
-                  <button class="complete-btn w-full py-2 border border-primary text-primary rounded-lg font-medium text-sm transition-smooth hover:bg-primary hover:text-white">
-                    标记完成
-                  </button>
-                </div>
-              </div>
-
-              <!-- 卡片 4：情绪命名 -->
-              <div class="emotion-card bg-white rounded-xl overflow-hidden card-shadow w-72 flex-shrink-0" data-card="nameEmotion">
-                <div class="h-36 bg-purple-50 relative">
-                  <img src="https://picsum.photos/300/200?random=16" alt="情绪命名练习" class="w-full h-full object-cover opacity-70" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
-                    <h3 class="text-white text-lg font-semibold p-4">情绪命名</h3>
-                  </div>
-                </div>
-                <div class="p-4">
-                  <p class="text-sm text-gray-600 mb-4">停下 30 秒，辨认情绪并命名：焦虑/紧绷/羞愧/不安…接纳它的存在。</p>
-                  <button class="complete-btn w-full py-2 border border-primary text-primary rounded-lg font-medium text-sm transition-smooth hover:bg-primary hover:text-white">
-                    标记完成
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- 指示器 -->
-          <div class="flex justify-center mt-4 space-x-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
-          </div>
-        </div>
-
-        <!-- 练习统计（动态） -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">练习进度</h3>
-          <div class="flex justify-between items-center mb-4">
-            <div>
-              <p class="text-sm text-gray-500">本周已完成</p>
-              <p id="statWeek" class="text-xl font-bold">0/7</p>
-            </div>
-            <div class="w-16 h-16 rounded-full border-4 border-primary/20 flex items-center justify-center">
-              <div class="text-center">
-                <p class="text-xs text-gray-500">连续天数</p>
-                <p id="statStreak" class="text-lg font-bold text-primary">0</p>
-              </div>
+          <div class="flex items-center mb-2">
+            <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mr-3">
+              <i class="fa fa-bolt text-pink-500"></i>
             </div>
             <div>
-              <p class="text-sm text-gray-500">总完成次数</p>
-              <p id="statTotal" class="text-xl font-bold">0</p>
+              <p class="font-medium">轻测评（约 2 分钟）</p>
+              <p class="text-xs text-gray-500">快速了解身体焦虑与自助准备度</p>
             </div>
           </div>
-          <div class="w-full bg-gray-100 rounded-full h-2.5">
-            <div id="statBar" class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
+          <button class="btn btn-primary w-full" id="startLight">开始轻测评</button>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 card-shadow">
+          <div class="flex items-center mb-2">
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+              <i class="fa fa-bar-chart text-blue-500"></i>
+            </div>
+            <div>
+              <p class="font-medium">专业测评（约 5–8 分钟）</p>
+              <p class="text-xs text-gray-500">四维度身心画像 + 个性化小计划</p>
+            </div>
+          </div>
+          <button class="btn btn-outline w-full" id="startPro">开始专业测评</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 轻测评页 -->
+    <section id="lightAssess" class="page">
+      <div class="mb-6">
+        <h2 class="text-xl font-bold">轻测评</h2>
+        <p class="text-sm text-gray-500">请根据最近一段时间的真实感受作答（1=从不，5=总是）</p>
+      </div>
+
+      <!-- 背景信息（可选） -->
+      <div class="bg-white rounded-xl p-4 card-shadow mb-4">
+        <p class="text-sm text-gray-600">（可选）填写基础信息以个性化建议：</p>
+        <div class="grid grid-cols-2 gap-3 mt-2">
+          <input id="lightHeight" type="number" min="80" max="230" class="border rounded-lg p-2" placeholder="身高(cm)">
+          <input id="lightWeight" type="number" min="20" max="250" class="border rounded-lg p-2" placeholder="体重(kg)">
+        </div>
+        <div class="mt-2">
+          <select id="lightFeel" class="border rounded-lg p-2 w-full">
+            <option value="">此刻身体/情绪主观感受</option>
+            <option>舒适</option><option>紧绷</option><option>疲惫</option><option>不自信</option>
+          </select>
+        </div>
+        <p id="lightBMIText" class="text-xs text-gray-500 mt-1"></p>
+      </div>
+
+      <!-- 题目容器 -->
+      <div id="lightQuestions" class="space-y-4"></div>
+
+      <div class="mt-5 flex items-center space-x-3">
+        <button id="submitLight" class="btn btn-primary flex-1"><i class="fa fa-check mr-1"></i> 提交并生成建议</button>
+        <button id="resetLight" class="btn btn-outline">重置</button>
+      </div>
+
+      <!-- 结果卡 -->
+      <div id="lightResult" class="hidden mt-6 bg-white rounded-xl p-4 card-shadow">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold">轻测评结果</h3>
+          <div class="space-x-2">
+            <button id="exportLightCSV" class="text-blue-600 text-sm"><i class="fa fa-table mr-1"></i>导出 CSV</button>
+            <button id="printLightPDF" class="text-blue-600 text-sm"><i class="fa fa-file-pdf-o mr-1"></i>导出 PDF</button>
+          </div>
+        </div>
+        <div id="lightSummary" class="text-sm text-gray-700 mt-3"></div>
+        <div class="mt-3">
+          <p class="text-sm text-gray-500 mb-1">今日小任务：</p>
+          <ul id="lightAdvice" class="list-disc pl-5 space-y-1 text-sm"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 专业测评页 -->
+    <section id="proAssess" class="page">
+      <div class="mb-6">
+        <h2 class="text-xl font-bold">专业测评</h2>
+        <p class="text-sm text-gray-500">请根据最近一段时间的真实感受作答（1 到 5）</p>
+      </div>
+
+      <div id="proQuestions" class="space-y-4"></div>
+
+      <div class="mt-5 flex items-center space-x-3">
+        <button id="submitPro" class="btn btn-primary flex-1"><i class="fa fa-check mr-1"></i> 提交并生成报告</button>
+        <button id="resetPro" class="btn btn-outline">重置</button>
+      </div>
+
+      <!-- 结果卡 -->
+      <div id="proResult" class="hidden mt-6 bg-white rounded-xl p-4 card-shadow">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold">专业测评报告</h3>
+          <div class="space-x-2">
+            <button id="exportProCSV" class="text-blue-600 text-sm"><i class="fa fa-table mr-1"></i>导出 CSV</button>
+            <button id="printProPDF" class="text-blue-600 text-sm"><i class="fa fa-file-pdf-o mr-1"></i>导出 PDF</button>
           </div>
         </div>
 
-        <!-- 相关推荐（动态） -->
+        <div class="grid md:grid-cols-2 gap-4 mt-3">
+          <div class="bg-gray-50 rounded-lg p-3">
+            <canvas id="proChart" height="180"></canvas>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 text-sm">
+            <div id="proOverall" class="mb-2"></div>
+            <div id="proBadges" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <h4 class="font-semibold mb-2">为你生成的小计划</h4>
+          <ul id="proPlan" class="list-disc pl-5 space-y-1 text-sm"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 其他模块：思维/情绪/实验/冥想/记录/徽章（简化保留，仍可用） -->
+    <section id="thought" class="page">
+      <div class="mb-5">
+        <h2 class="text-xl font-bold">自动思维记录</h2>
+        <p class="text-sm text-gray-500">聚焦身材/外貌比较/自我否定等情境</p>
+      </div>
+      <div class="bg-white p-4 rounded-xl card-shadow space-y-3">
+        <select id="trContext" class="border rounded-lg p-2 w-full">
+          <option value="">情境</option>
+          <option>社交媒体对比</option><option>穿衣不自信</option>
+          <option>体重波动</option><option>饮食控制失控</option>
+          <option>外貌被评价</option><option>其他</option>
+        </select>
+        <input id="trContextCustom" class="border rounded-lg p-2 w-full" placeholder="选择'其他'时在此填写">
+        <textarea id="trThought" class="border rounded-lg p-2 w-full" rows="3" placeholder="当时的想法"></textarea>
+        <textarea id="trEvidence" class="border rounded-lg p-2 w-full" rows="3" placeholder="支持与反驳的证据"></textarea>
         <div>
-          <h3 class="text-lg font-semibold mb-4">相关推荐</h3>
-          <div id="emotionRecs" class="space-y-4"></div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-sm">情绪强度</label>
+            <span id="emotionScore" class="text-blue-600 font-semibold">5</span>
+          </div>
+          <input id="trEmotion" type="range" min="1" max="10" value="5" class="w-full" oninput="document.getElementById('emotionScore').textContent=this.value">
+        </div>
+        <button id="saveTR" class="btn btn-primary w-full"><i class="fa fa-save mr-1"></i>保存记录</button>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl card-shadow mt-4">
+        <h3 class="font-semibold mb-2">最近一次记录</h3>
+        <div id="trPreview" class="text-sm text-gray-700">暂无</div>
+      </div>
+    </section>
+
+    <section id="emotion" class="page">
+      <div class="mb-5">
+        <h2 class="text-xl font-bold">情绪调节卡片</h2>
+        <p class="text-sm text-gray-500">完成卡片可计入连续天数与徽章</p>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl p-4 card-shadow">
+          <h4 class="font-semibold">4-2-6 呼吸</h4>
+          <p class="text-sm text-gray-600">吸 4 秒 – 停 2 秒 – 呼 6 秒 × 10 轮</p>
+          <button data-card="breath" class="finishCard mt-3 btn btn-outline w-full">标记完成</button>
+        </div>
+        <div class="bg-white rounded-xl p-4 card-shadow">
+          <h4 class="font-semibold">五感觉察</h4>
+          <p class="text-sm text-gray-600">5-4-3-2-1 感官锚定</p>
+          <button data-card="five" class="finishCard mt-3 btn btn-outline w-full">标记完成</button>
+        </div>
+        <div class="bg-white rounded-xl p-4 card-shadow">
+          <h4 class="font-semibold">正念饮食</h4>
+          <p class="text-sm text-gray-600">观察-嗅闻-品尝，慢慢吃</p>
+          <button data-card="eating" class="finishCard mt-3 btn btn-outline w-full">标记完成</button>
+        </div>
+        <div class="bg-white rounded-xl p-4 card-shadow">
+          <h4 class="font-semibold">情绪命名</h4>
+          <p class="text-sm text-gray-600">给情绪一个名字，它会变小</p>
+          <button data-card="naming" class="finishCard mt-3 btn btn-outline w-full">标记完成</button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-4 card-shadow mt-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-500">本周完成</p>
+            <p id="emoWeek" class="text-lg font-bold">0/7</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">连续天数</p>
+            <p id="emoStreak" class="text-lg font-bold text-blue-600">0</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">总次数</p>
+            <p id="emoTotal" class="text-lg font-bold">0</p>
+          </div>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2 mt-2">
+          <div id="emoBar" class="h-2 bg-blue-500 rounded-full" style="width:0%"></div>
         </div>
       </div>
     </section>
 
-    <!-- 行为实验指南 -->
-    <section id="behaviorExperimentPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">行为实验指南</h2>
-          <p class="text-gray-500 text-sm">用小实验验证焦虑性信念，获得新证据</p>
-        </div>
+    <section id="experiment" class="page">
+      <div class="mb-5">
+        <h2 class="text-xl font-bold">行为实验指南</h2>
+        <p class="text-sm text-gray-500">用小步行动验证担忧信念</p>
+      </div>
+      <div class="bg-white p-4 rounded-xl card-shadow space-y-3">
+        <input id="bxBelief" class="border rounded-lg p-2 w-full" placeholder="我的担忧信念（例：别人会因我多吃一口而评价我）">
+        <input id="bxStep1" class="border rounded-lg p-2 w-full" placeholder="小步尝试 1">
+        <input id="bxStep2" class="border rounded-lg p-2 w-full" placeholder="小步尝试 2">
+        <input id="bxStep3" class="border rounded-lg p-2 w-full" placeholder="小步尝试 3">
+        <textarea id="bxPredict" class="border rounded-lg p-2 w-full" rows="2" placeholder="我预测会发生…"></textarea>
+        <textarea id="bxActual" class="border rounded-lg p-2 w-full" rows="2" placeholder="实际发生…"></textarea>
+        <textarea id="bxLearn" class="border rounded-lg p-2 w-full" rows="2" placeholder="结论与新的认识…"></textarea>
+        <button id="saveBX" class="btn btn-primary w-full"><i class="fa fa-save mr-1"></i>保存实验</button>
+      </div>
 
-        <!-- 说明 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-3">什么是行为实验？</h3>
-          <div class="prose prose-sm text-gray-700">
-            <p>行为实验是 CBT 的核心技术：设计并执行小型、低风险的行动，验证“我担心的事是否真的会发生”。</p>
-            <ul class="list-disc pl-5 space-y-1 mt-1">
-              <li>发现认知与现实的差距</li>
-              <li>收集反证，挑战不合理信念</li>
-              <li>通过体验形成新的、更健康的认知</li>
-            </ul>
-          </div>
-        </div>
+      <div class="mt-4">
+        <h3 class="font-semibold mb-2">最近实验</h3>
+        <div id="bxList" class="space-y-2"></div>
+      </div>
+    </section>
 
-        <!-- 记录模板 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">实验记录</h3>
-            <span class="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full">自动保存</span>
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">我的担忧信念</label>
-            <textarea id="bxBelief" rows="3" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="例如：如果我在朋友面前吃东西，他们会觉得我失控…"></textarea>
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">小步尝试设计</label>
-            <div class="space-y-3">
-              <input id="bxStep1" type="text" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="第一步：例如，在熟悉的环境下与好友一起吃一小份点心…" />
-              <input id="bxStep2" type="text" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="第二步：……" />
-              <input id="bxStep3" type="text" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="第三步：……" />
+    <section id="mindfulness" class="page">
+      <div class="mb-5">
+        <h2 class="text-xl font-bold">冥想/正念练习</h2>
+        <p class="text-sm text-gray-500">3 分钟计时练习（无音频也可完成）</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 card-shadow">
+        <div class="flex flex-col items-center">
+          <audio id="audio" preload="none">
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
+          </audio>
+          <button id="playPause" class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center"><i class="fa fa-play"></i></button>
+          <div class="w-full mt-3">
+            <div class="flex items-center justify-between text-xs text-gray-500">
+              <span id="curTime">00:00</span><span id="totalTime">03:00</span>
             </div>
+            <input id="seek" type="range" min="0" max="180" value="0" class="w-full">
           </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">我预测会发生什么？</label>
-            <textarea id="bxPredict" rows="2" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">实际结果记录</label>
-            <textarea id="bxActual" rows="3" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <div class="mb-3">
-            <label class="block text-sm font-medium text-gray-700 mb-2">结论与新的认识</label>
-            <textarea id="bxLearn" rows="3" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <button id="btnSaveBX" class="btn-primary"><i class="fa fa-save mr-2"></i>保存实验记录</button>
-        </div>
-
-        <!-- 历史实验（动态） -->
-        <div class="mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">历史实验记录</h3>
-            <button class="text-primary text-sm" id="btnViewAllBX">查看全部</button>
-          </div>
-          <div id="bxList" class="space-y-3"></div>
+          <button id="startTimer" class="btn btn-outline mt-3">开始 3 分钟计时</button>
         </div>
       </div>
     </section>
 
-    <!-- 冥想/正念练习 -->
-    <section id="mindfulnessPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">冥想/正念练习</h2>
-          <p class="text-gray-500 text-sm">3–5 分钟引导，随时进入平静</p>
+    <section id="myRecords" class="page">
+      <div class="mb-5">
+        <h2 class="text-xl font-bold">我的记录</h2>
+        <p class="text-sm text-gray-500">测评/思维/练习/冥想/实验</p>
+      </div>
+      <div class="bg-white p-4 rounded-xl card-shadow">
+        <div class="flex flex-wrap gap-2 mb-3">
+          <button class="filter px-3 py-1 rounded-full bg-blue-500 text-white text-sm" data-type="all">全部</button>
+          <button class="filter px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm" data-type="assessment">测评</button>
+          <button class="filter px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm" data-type="thought">思维</button>
+          <button class="filter px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm" data-type="emotion">练习</button>
+          <button class="filter px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm" data-type="mindfulness">冥想</button>
+          <button class="filter px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm" data-type="experiment">实验</button>
         </div>
-
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <div class="flex flex-col items-center">
-            <audio id="audio" preload="none">
-              <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
-            </audio>
-
-            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 to-primary flex items-center justify-center mb-5">
-              <i class="fa fa-play text-white text-3xl" id="playPauseIcon"></i>
-            </div>
-
-            <h3 class="text-lg font-semibold mb-1">3 分钟呼吸冥想</h3>
-            <p class="text-sm text-gray-500 mb-5">如果音频加载慢，可仅用计时练习</p>
-
-            <div class="w-full mb-4">
-              <div class="flex justify-between text-xs text-gray-500 mb-1">
-                <span id="currentTime">00:00</span>
-                <span id="totalTime">03:00</span>
-              </div>
-              <input id="seekBar" type="range" min="0" max="180" value="0" class="w-full h-1.5 bg-gray-200 rounded-lg accent-primary" />
-            </div>
-
-            <div class="flex items-center justify-between w-full max-w-xs">
-              <button id="btnStepBack" class="text-gray-500 hover:text-primary transition-smooth">
-                <i class="fa fa-step-backward"></i>
-              </button>
-              <button id="playPauseBtn" class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center">
-                <i class="fa fa-play"></i>
-              </button>
-              <button id="btnStepForward" class="text-gray-500 hover:text-primary transition-smooth">
-                <i class="fa fa-step-forward"></i>
-              </button>
-            </div>
-
-            <div class="w-full mt-5 flex items-center">
-              <i class="fa fa-volume-up text-gray-500 mr-2"></i>
-              <input id="volumeBar" type="range" min="0" max="1" step="0.01" value="0.7" class="w-full h-1 bg-gray-200 rounded-lg accent-primary" />
-            </div>
-
-            <button id="btnCache" class="mt-5 text-sm text-primary flex items-center">
-              <i class="fa fa-download mr-1"></i> 记为已缓存（离线提示）
-            </button>
-          </div>
-        </div>
-
-        <!-- 文字指导 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-3">练习指导</h3>
-          <p class="text-sm text-gray-600">找一个安静、舒适的环境，保持自然呼吸。当注意力走神时，温和地把它带回呼吸，不评判自己。</p>
-          <button id="startPracticeBtn" class="w-full mt-5 py-3 bg-primary text-white rounded-lg font-medium">
-            开始计时练习（3 分钟）
-          </button>
-        </div>
-
-        <!-- 更多练习 -->
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">更多练习</h3>
-            <button class="text-primary text-sm">查看全部</button>
-          </div>
-          <div class="space-y-3">
-            <div class="bg-white rounded-lg p-4 card-shadow flex items-center">
-              <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <i class="fa fa-headphones text-secondary"></i>
-              </div>
-              <div class="flex-grow">
-                <h4 class="font-medium">5 分钟身体扫描</h4>
-                <p class="text-xs text-gray-500">关注身体感受，释放紧张</p>
-              </div>
-              <div class="flex-shrink-0">
-                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full mr-2">5:00</span>
-                <button class="text-primary"><i class="fa fa-play-circle-o"></i></button>
-              </div>
-            </div>
-            <div class="bg-white rounded-lg p-4 card-shadow flex items-center">
-              <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <i class="fa fa-headphones text-accent"></i>
-              </div>
-              <div class="flex-grow">
-                <h4 class="font-medium">睡前放松冥想</h4>
-                <p class="text-xs text-gray-500">缓解入睡困难</p>
-              </div>
-              <div class="flex-shrink-0">
-                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full mr-2">8:00</span>
-                <button class="text-primary"><i class="fa fa-play-circle-o"></i></button>
-              </div>
-            </div>
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-500">最近 30 天</div>
+          <div class="space-x-3">
+            <button id="exportAllCSV" class="text-blue-600 text-sm"><i class="fa fa-download mr-1"></i>导出 CSV</button>
+            <button id="clearAll" class="text-red-500 text-sm"><i class="fa fa-trash-o mr-1"></i>清空所有</button>
           </div>
         </div>
       </div>
+      <div id="recordList" class="mt-3 space-y-3"></div>
     </section>
 
-    <!-- 我的记录 -->
-    <section id="myRecordsPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">我的记录</h2>
-          <p class="text-gray-500 text-sm">查看与管理你的所有记录</p>
-        </div>
-
-        <!-- 筛选 -->
-        <div class="bg-white rounded-xl p-4 card-shadow mb-6">
-          <div class="flex flex-wrap gap-2 mb-3">
-            <button data-filter="all" class="filter-btn px-3 py-1.5 bg-primary text-white text-sm rounded-full">全部记录</button>
-            <button data-filter="thought" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">自动思维</button>
-            <button data-filter="emotion" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">情绪练习</button>
-            <button data-filter="experiment" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">行为实验</button>
-            <button data-filter="mindfulness" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">冥想</button>
-            <button data-filter="assessment" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">测评</button>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <i class="fa fa-calendar text-gray-500 mr-2"></i>
-              <span class="text-sm text-gray-600">最近 30 天</span>
-            </div>
-            <div class="space-x-2">
-              <button id="btnExportAll" class="text-primary text-sm"><i class="fa fa-download mr-1"></i>导出所有 CSV</button>
-              <button id="btnClearAll" class="text-red-500 text-sm"><i class="fa fa-trash-o mr-1"></i>清空所有数据</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 列表 -->
-        <div id="recordList" class="space-y-3"></div>
+    <section id="badges" class="page">
+      <div class="mb-5">
+        <h2 class="text-xl font-bold">我的徽章</h2>
       </div>
-    </section>
-
-    <!-- 我的徽章 -->
-    <section id="myBadgesPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">我的徽章</h2>
-          <p class="text-gray-500 text-sm">记录你的坚持与进步</p>
-        </div>
-
-        <div class="mb-8">
-          <h3 class="text-lg font-semibold mb-4">已解锁</h3>
-          <div id="badgeUnlocked" class="grid grid-cols-3 gap-4"></div>
-        </div>
-
-        <div>
-          <h3 class="text-lg font-semibold mb-4">待解锁</h3>
-          <div id="badgeLocked" class="grid grid-cols-3 gap-4"></div>
-        </div>
-      </div>
+      <div class="grid grid-cols-3 gap-4" id="badgeUnlocked"></div>
+      <h3 class="font-semibold mt-6 mb-2">待解锁</h3>
+      <div class="grid grid-cols-3 gap-4" id="badgeLocked"></div>
     </section>
   </main>
 
   <!-- 底部导航 -->
-  <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-40">
-    <div class="flex justify-around items-center py-3">
-      <button class="nav-btn flex flex-col items-center text-primary" data-target="homePage">
-        <i class="fa fa-home text-lg mb-1"></i><span class="text-xs">首页</span>
-      </button>
-      <button class="nav-btn flex flex-col items-center text-gray-500" data-target="emotionRegulationPage">
-        <i class="fa fa-heart text-lg mb-1"></i><span class="text-xs">练习</span>
-      </button>
-      <button class="nav-btn flex flex-col items-center text-gray-500" data-target="myRecordsPage">
-        <i class="fa fa-book text-lg mb-1"></i><span class="text-xs">记录</span>
-      </button>
-      <button class="nav-btn flex flex-col items-center text-gray-500" data-target="myBadgesPage">
-        <i class="fa fa-star-o text-lg mb-1"></i><span class="text-xs">徽章</span>
-      </button>
+  <footer class="fixed bottom-0 left-0 right-0 bg-white border-t z-40">
+    <div class="max-w-3xl mx-auto px-4">
+      <div class="flex items-center justify-around h-14">
+        <button class="nav text-blue-600" data-goto="home"><i class="fa fa-home"></i><div class="text-xs">首页</div></button>
+        <button class="nav text-gray-500" data-goto="emotion"><i class="fa fa-heart"></i><div class="text-xs">练习</div></button>
+        <button class="nav text-gray-500" data-goto="myRecords"><i class="fa fa-book"></i><div class="text-xs">记录</div></button>
+        <button class="nav text-gray-500" data-goto="badges"><i class="fa fa-star-o"></i><div class="text-xs">徽章</div></button>
+      </div>
     </div>
   </footer>
 
   <script>
-    /*****************
-     * 基础工具 & 存储
-     *****************/
-    const DB_KEY = "mindfit_db_v1";
-
+    /************ 数据存储 ************/
+    const DB_KEY = "mindfit_db_v2";
     const defaultDB = () => ({
-      records: [],          // 思维记录
-      emotions: [],         // 情绪练习完成 {card, ts}
-      experiments: [],      // 行为实验
-      mindfulness: [],      // 冥想练习 {seconds, ts}
-      assessments: [],      // 测评结果
-      badges: {},           // 徽章布尔
-      streak: { count: 0, lastDate: "" }, // 连续天数
-      cachedAudio: false,   // 冥想音频缓存标记（提示用）
+      assessments: [], // {type:'light'/'pro', ts, payload, result}
+      records: [],
+      emotions: [],
+      experiments: [],
+      mindfulness: [],
+      badges: {},
+      streak: {count:0, lastDate:""}
     });
-
     const loadDB = () => {
-      try {
-        const raw = localStorage.getItem(DB_KEY);
-        return raw ? JSON.parse(raw) : defaultDB();
-      } catch (e) {
-        return defaultDB();
-      }
+      try{ return JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB(); }
+      catch{ return defaultDB(); }
+    };
+    const saveDB = db => localStorage.setItem(DB_KEY, JSON.stringify(db));
+    const today = () => (new Date()).toISOString().slice(0,10);
+    const fmt = ts => {
+      const d = new Date(ts); const p=n=>n<10?("0"+n):n;
+      return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    };
+    const toast = (s)=>{ const t=document.getElementById("toast"); t.textContent=s; t.style.display="block"; setTimeout(()=>t.style.display="none",1800); };
+    const touchStreak = (db)=>{
+      const t = today(); if(db.streak.lastDate===t) return;
+      const last = db.streak.lastDate? new Date(db.streak.lastDate): null;
+      const now = new Date(t); const ONE=86400000;
+      const consecutive = last && ((now - last)===ONE);
+      db.streak.count = consecutive? (db.streak.count+1):1;
+      db.streak.lastDate=t;
     };
 
-    const saveDB = (db) => localStorage.setItem(DB_KEY, JSON.stringify(db));
-
-    const todayStr = () => {
-      const d = new Date();
-      return d.toISOString().slice(0, 10);
+    /************ 导航 ************/
+    const pages = ["home","assessHub","lightAssess","proAssess","thought","emotion","experiment","mindfulness","myRecords","badges"];
+    const titleMap = {
+      home:"MindFit 身心管理",
+      assessHub:"身心测评",
+      lightAssess:"轻测评",
+      proAssess:"专业测评",
+      thought:"自动思维记录",
+      emotion:"情绪调节卡片",
+      experiment:"行为实验指南",
+      mindfulness:"冥想/正念练习",
+      myRecords:"我的记录",
+      badges:"我的徽章"
+    };
+    let historyStack = ["home"];
+    const goto = (id)=>{
+      pages.forEach(p => document.getElementById(p).classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      document.getElementById("pageTitle").textContent = titleMap[id] || "MindFit";
+      if(historyStack[historyStack.length-1]!==id) historyStack.push(id);
+      window.scrollTo(0,0);
+      // 进入页面触发渲染
+      if(id==="home") renderHome();
+      if(id==="thought") renderTRPreview();
+      if(id==="emotion") renderEmotionStats();
+      if(id==="experiment") renderBXList();
+      if(id==="myRecords") renderRecordList("all");
+      if(id==="badges") renderBadges();
+      if(id==="assessHub") {/*no-op*/}
+      if(id==="lightAssess") renderLightQuestions();
+      if(id==="proAssess") renderProQuestions();
     };
 
-    const fmtTime = (ts) => {
-      const d = new Date(ts);
-      const pad = (n) => (n < 10 ? "0" + n : n);
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    };
-
-    const showToast = (msg) => {
-      const wrap = document.getElementById("toast");
-      const box = wrap.firstElementChild;
-      box.textContent = msg;
-      wrap.classList.remove("hidden");
-      setTimeout(() => wrap.classList.add("hidden"), 1800);
-    };
-
-    // streak 更新：每天任意操作一次记为活跃
-    const touchStreak = (db) => {
-      const t = todayStr();
-      if (db.streak.lastDate === t) return;
-      // 判断是否连续
-      const last = db.streak.lastDate ? new Date(db.streak.lastDate) : null;
-      const y = new Date(t);
-      const one = 24 * 60 * 60 * 1000;
-      const isConsecutive = last && (y - last) / one === 1;
-      db.streak.count = isConsecutive ? (db.streak.count + 1) : 1;
-      db.streak.lastDate = t;
-    };
-
-    /*****************
-     * 页面导航
-     *****************/
-    document.addEventListener("DOMContentLoaded", () => {
-      const pages = document.querySelectorAll(".page");
-      const backBtn = document.getElementById("backBtn");
-      const pageTitle = document.getElementById("pageTitle");
-      const featureCards = document.querySelectorAll(".feature-card");
-      const otherLinks = document.querySelectorAll("[data-target]");
-      const navBtns = document.querySelectorAll(".nav-btn");
-
-      let pageHistory = ["homePage"];
-
-      const titleMap = {
-        homePage: "MindFit 身心管理",
-        assessmentPage: "身心轻测评",
-        thoughtRecordPage: "自动思维记录",
-        emotionRegulationPage: "情绪调节卡片",
-        behaviorExperimentPage: "行为实验指南",
-        mindfulnessPage: "冥想/正念练习",
-        myRecordsPage: "我的记录",
-        myBadgesPage: "我的徽章",
-      };
-
-      function navigateTo(id) {
-        pages.forEach((p) => p.classList.add("hidden"));
-        const target = document.getElementById(id);
-        if (!target) return;
-        target.classList.remove("hidden");
-        pageTitle.textContent = titleMap[id] || "MindFit";
-        if (pageHistory[pageHistory.length - 1] !== id) pageHistory.push(id);
-        window.scrollTo(0, 0);
-        // 进入页面时渲染
-        switch (id) {
-          case "homePage":
-            renderHome();
-            break;
-          case "thoughtRecordPage":
-            renderTRPreview();
-            break;
-          case "emotionRegulationPage":
-            renderEmotionStats();
-            renderEmotionRecs();
-            break;
-          case "behaviorExperimentPage":
-            renderBXList();
-            break;
-          case "myRecordsPage":
-            renderRecordList("all");
-            break;
-          case "myBadgesPage":
-            renderBadges();
-            break;
-          case "assessmentPage":
-            renderAssessment();
-            break;
-        }
-      }
-
-      featureCards.forEach((c) => c.addEventListener("click", () => navigateTo(c.dataset.target)));
-      otherLinks.forEach((c) => c.addEventListener("click", () => navigateTo(c.dataset.target)));
-      navBtns.forEach((c) => c.addEventListener("click", () => navigateTo(c.dataset.target)));
-
-      backBtn.addEventListener("click", () => {
-        if (pageHistory.length > 1) {
-          pageHistory.pop();
-          navigateTo(pageHistory[pageHistory.length - 1]);
-        }
-      });
-
-      /*****************
-       * 轻测评（9题）
-       *****************/
-      const QUESTIONS = [
-        "我经常因为身材/外貌而感到焦虑",
-        "我会把自己和社交媒体上的“完美身材”比较",
-        "当控制饮食失败时，我会强烈自责",
-        "我会因为情绪而吃得过多或过少",
-        "我对自己的身体功能（而非外貌）感到满足",
-        "紧张时，我能通过呼吸/放松让自己好受一些",
-        "我能温柔地和自己说话（而不是苛责）",
-        "我愿意尝试小任务来改变一点点习惯",
-        "我能识别并命名当下的情绪",
-      ];
-
-      function renderAssessment() {
-        // BMI 文本
-        const h = document.getElementById("heightInput");
-        const w = document.getElementById("weightInput");
-        const bmiText = document.getElementById("bmiText");
-        const updateBMI = () => {
-          const hv = parseFloat(h.value) || 0;
-          const wv = parseFloat(w.value) || 0;
-          if (!hv || !wv) {
-            bmiText.textContent = "";
-            return;
-          }
-          const bmi = (wv / Math.pow(hv / 100, 2)).toFixed(1);
-          let label = "功能健康角度：关注身体能做什么，而非数字。";
-          if (bmi < 18.5) label = "提示：可能偏瘦，注意营养与能量补充。";
-          else if (bmi < 24) label = "提示：总体良好，继续保持均衡与觉察。";
-          else if (bmi < 28) label = "提示：适度调整饮食与活动，循序渐进。";
-          else label = "提示：建议在专业指导下稳步管理与监测。";
-          bmiText.textContent = `BMI≈${bmi}。${label}`;
-        };
-        h.oninput = updateBMI;
-        w.oninput = updateBMI;
-
-        // 渲染 9 题
-        const qList = document.getElementById("qList");
-        if (!qList.dataset.rendered) {
-          qList.innerHTML = QUESTIONS.map((q, i) => {
-            return `<div>
-                <label class="block text-sm text-gray-700 mb-1">${i + 1}. ${q}</label>
-                <input type="range" min="1" max="5" value="3" class="w-full h-2 bg-gray-200 rounded-lg accent-primary assess-item" data-idx="${i}">
-                <div class="flex justify-between text-xs text-gray-400"><span>1 从不</span><span>5 总是</span></div>
-              </div>`;
-          }).join("");
-          qList.dataset.rendered = "1";
-        }
-      }
-
-      document.getElementById("btnAssess").addEventListener("click", () => {
-        const db = loadDB();
-        const vals = [...document.querySelectorAll(".assess-item")].map((x) => Number(x.value));
-        if (vals.length !== QUESTIONS.length) {
-          showToast("请完成所有题目");
-          return;
-        }
-        const height = parseFloat(document.getElementById("heightInput").value) || null;
-        const weight = parseFloat(document.getElementById("weightInput").value) || null;
-        const bodyFeel = document.getElementById("bodyFeel").value || "";
-
-        const score = vals.reduce((a, b) => a + b, 0); // 9~45
-        const ts = Date.now();
-
-        // 生成建议
-        const advice = [];
-        if (score >= 30) advice.push("建议优先使用：深呼吸 + 五感觉察，每天 2 次，每次 2 分钟。");
-        if (score < 30) advice.push("建议维持：每日 1 次正念呼吸 + 一次自我肯定语。");
-        if (bodyFeel === "不自信") advice.push("阅读：身体中立入门，尝试写下 3 条身体功能感恩。");
-        if (bodyFeel === "紧绷") advice.push("今日小任务：4-2-6 呼吸 10 轮，放松肩颈伸展 5 分钟。");
-        if (bodyFeel === "疲惫") advice.push("今日小任务：早点休息；晚间 3 分钟冥想。");
-
-        db.assessments.push({
-          ts,
-          score,
-          vals,
-          height,
-          weight,
-          bodyFeel,
-        });
-        touchStreak(db);
-        saveDB(db);
-        unlockBadgesIfNeeded(db);
-        renderHome();
-
-        const box = document.getElementById("assessResult");
-        const ul = document.getElementById("adviceList");
-        ul.innerHTML = advice.map((t) => `<li>${t}</li>`).join("");
-        box.classList.remove("hidden");
-        showToast("测评完成，已为你生成建议");
-      });
-
-      /*****************
-       * 自动思维记录
-       *****************/
-      const btnSaveTR = document.getElementById("btnSaveTR");
-      btnSaveTR.addEventListener("click", () => {
-        const contextSel = document.getElementById("trContext").value;
-        const contextCustom = document.getElementById("trContextCustom").value.trim();
-        const thought = document.getElementById("trThought").value.trim();
-        const evidence = document.getElementById("trEvidence").value.trim();
-        const emotion = Number(document.getElementById("trEmotion").value) || 5;
-        const ctx = contextSel.includes("其他") ? (contextCustom || "未填写") : (contextSel || contextCustom);
-
-        if (!thought) return showToast("请先填写当时的想法～");
-
-        const db = loadDB();
-        db.records.push({
-          ts: Date.now(),
-          context: ctx || "未填写",
-          thought,
-          evidence,
-          emotion,
-        });
-        touchStreak(db);
-        saveDB(db);
-        unlockBadgesIfNeeded(db);
-        renderTRPreview();
-        renderHome();
-        showToast("已保存到本地记录");
-      });
-
-      function renderTRPreview() {
-        const db = loadDB();
-        const box = document.getElementById("trPreview");
-        if (!db.records.length) {
-          box.textContent = "暂无记录，保存后会显示预览。";
-          return;
-        }
-        const r = db.records[db.records.length - 1];
-        box.innerHTML = `
-          <div class="flex justify-between items-start mb-3">
-            <span class="text-sm text-gray-500">记录时间</span>
-            <span class="text-sm font-medium">${fmtTime(r.ts)}</span>
-          </div>
-          <div class="mb-2"><span class="text-sm text-gray-500 block mb-1">情境</span><p class="text-sm">${r.context}</p></div>
-          <div class="mb-2"><span class="text-sm text-gray-500 block mb-1">当时的想法</span><p class="text-sm">${r.thought || "-"}</p></div>
-          <div class="mb-2"><span class="text-sm text-gray-500 block mb-1">证据</span><p class="text-sm">${r.evidence || "-"}</p></div>
-          <div><span class="text-sm text-gray-500 block mb-1">情绪强度</span>
-            <div class="flex items-center">
-              <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden mr-2">
-                <div class="h-full bg-red-400 rounded-full" style="width:${r.emotion * 10}%"></div>
-              </div>
-              <span class="text-sm font-medium">${r.emotion} 分</span>
-            </div>
-          </div>
-        `;
-      }
-
-      // 导出 CSV（思维记录）
-      document.getElementById("btnExportCSV").addEventListener("click", () => {
-        const { records } = loadDB();
-        if (!records.length) return showToast("暂无数据可导出");
-        const header = ["时间", "情境", "想法", "证据", "情绪强度"];
-        const rows = records.map((r) => [fmtTime(r.ts), r.context, r.thought.replace(/\n/g, " "), (r.evidence || "").replace(/\n/g, " "), r.emotion]);
-        const csv = [header, ...rows].map((r) => r.map((x) => `"${(x + "").replace(/"/g, '""')}"`).join(",")).join("\n");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "mindfit_thought_records.csv";
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-
-      // 打印为 PDF（浏览器端）
-      document.getElementById("btnPrint").addEventListener("click", () => {
-        const win = window.open("", "_blank");
-        const { records } = loadDB();
-        win.document.write(`<html><head><title>思维记录打印</title></head><body><h2>思维记录</h2>`);
-        if (!records.length) {
-          win.document.write("<p>暂无记录</p>");
-        } else {
-          records.forEach((r) => {
-            win.document.write(`<div style="margin:12px 0;padding:12px;border:1px solid #eee">
-              <div><b>时间：</b>${fmtTime(r.ts)}</div>
-              <div><b>情境：</b>${r.context}</div>
-              <div><b>想法：</b>${r.thought.replace(/\n/g, "<br/>")}</div>
-              <div><b>证据：</b>${(r.evidence || "").replace(/\n/g, "<br/>")}</div>
-              <div><b>情绪强度：</b>${r.emotion} 分</div>
-            </div>`);
-          });
-        }
-        win.document.write(`</body></html>`);
-        win.document.close();
-        win.focus();
-        win.print();
-      });
-
-      /*****************
-       * 情绪练习
-       *****************/
-      document.querySelectorAll(".complete-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const card = btn.closest(".emotion-card");
-          const cardId = card?.dataset?.card || "unknown";
-          const db = loadDB();
-          db.emotions.push({ card: cardId, ts: Date.now() });
-          touchStreak(db);
-          saveDB(db);
-          unlockBadgesIfNeeded(db);
-          renderEmotionStats();
-          renderHome();
-
-          // 视觉标记
-          card.classList.add("opacity-60");
-          const sticker = card.querySelector(".done-sticker");
-          if (sticker) sticker.classList.remove("hidden");
-          btn.innerHTML = "已完成";
-          btn.classList.remove("border-primary", "text-primary", "hover:bg-primary", "hover:text-white");
-          btn.classList.add("border-gray-300", "text-gray-500", "bg-gray-100");
-          showToast("已标记完成！");
-        });
-      });
-
-      function calcWeekStats(items) {
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay()); // 周日为 0
-        const cnt = items.filter((x) => new Date(x.ts) >= startOfWeek).length;
-        return cnt;
-      }
-
-      function renderEmotionStats() {
-        const db = loadDB();
-        const week = calcWeekStats(db.emotions);
-        const total = db.emotions.length;
-        document.getElementById("statWeek").textContent = `${Math.min(7, week)}/7`;
-        document.getElementById("statTotal").textContent = total;
-        document.getElementById("statStreak").textContent = db.streak.count;
-        document.getElementById("statBar").style.width = `${Math.min(100, (week / 7) * 100)}%`;
-      }
-
-      function renderEmotionRecs() {
-        const db = loadDB();
-        const list = document.getElementById("emotionRecs");
-        // 简单推荐：若最近情绪强度>=7，优先推荐呼吸 & 情绪命名；否则推荐正念饮食
-        const lastTR = db.records.slice(-1)[0];
-        const high = lastTR && lastTR.emotion >= 7;
-        const recs = high
-          ? [
-              { title: "立刻试试 4-2-6 呼吸", desc: "2 分钟快速稳定情绪", tag: "应急", img: 21 },
-              { title: "情绪命名清单", desc: "给情绪一个名字就会变小", tag: "情绪", img: 22 },
-            ]
-          : [
-              { title: "正念饮食入门", desc: "从一颗葡萄干开始", tag: "正念", img: 23 },
-              { title: "身体中立 3 步", desc: "关注功能而非外貌", tag: "理念", img: 24 },
-            ];
-        list.innerHTML = recs
-          .map(
-            (r) => `<div class="bg-white rounded-xl overflow-hidden card-shadow flex">
-              <img src="https://picsum.photos/120/120?random=${r.img}" class="w-24 h-24 object-cover flex-shrink-0" alt="${r.title}">
-              <div class="p-3 flex-grow">
-                <h4 class="font-medium text-sm mb-1">${r.title}</h4>
-                <p class="text-xs text-gray-500 mb-2 line-clamp-2">${r.desc}</p>
-                <span class="badge bg-blue-50 text-primary">${r.tag}</span>
-              </div>
-            </div>`
-          )
-          .join("");
-      }
-
-      /*****************
-       * 行为实验
-       *****************/
-      document.getElementById("btnSaveBX").addEventListener("click", () => {
-        const db = loadDB();
-        const item = {
-          ts: Date.now(),
-          belief: document.getElementById("bxBelief").value.trim(),
-          steps: [document.getElementById("bxStep1").value.trim(), document.getElementById("bxStep2").value.trim(), document.getElementById("bxStep3").value.trim()].filter(Boolean),
-          predict: document.getElementById("bxPredict").value.trim(),
-          actual: document.getElementById("bxActual").value.trim(),
-          learn: document.getElementById("bxLearn").value.trim(),
-        };
-        if (!item.belief) return showToast("请先填写担忧信念");
-        db.experiments.push(item);
-        touchStreak(db);
-        saveDB(db);
-        unlockBadgesIfNeeded(db);
-        renderBXList();
-        showToast("实验已保存");
-      });
-
-      function renderBXList() {
-        const db = loadDB();
-        const box = document.getElementById("bxList");
-        if (!db.experiments.length) {
-          box.innerHTML = `<div class="text-sm text-gray-500">暂无记录</div>`;
-          return;
-        }
-        box.innerHTML = db.experiments
-          .slice(-3)
-          .reverse()
-          .map(
-            (e) => `<div class="bg-white rounded-lg p-4 card-shadow">
-            <div class="flex justify-between items-start mb-2">
-              <h4 class="font-medium">实验：${e.belief.slice(0, 16)}${e.belief.length > 16 ? "..." : ""}</h4>
-              <span class="text-xs text-gray-500">${fmtTime(e.ts)}</span>
-            </div>
-            <p class="text-sm text-gray-600 line-clamp-2 mb-2">${e.predict ? "预测：" + e.predict : ""}</p>
-            <div class="flex justify-between items-center">
-              <span class="badge bg-green-50 text-green-600">已保存</span>
-            </div>
-          </div>`
-          )
-          .join("");
-      }
-
-      /*****************
-       * 冥想/正念
-       *****************/
-      const audio = document.getElementById("audio");
-      const playBtn = document.getElementById("playPauseBtn");
-      const playIcon = document.getElementById("playPauseIcon");
-      const seekBar = document.getElementById("seekBar");
-      const vol = document.getElementById("volumeBar");
-      const cur = document.getElementById("currentTime");
-      const total = document.getElementById("totalTime");
-
-      let timerId = null;
-
-      function updateTimeDisplay(sec) {
-        const m = String(Math.floor(sec / 60)).padStart(2, "0");
-        const s = String(Math.floor(sec % 60)).padStart(2, "0");
-        return `${m}:${s}`;
-      }
-
-      function setTotal(sec) {
-        total.textContent = updateTimeDisplay(sec);
-        seekBar.max = String(sec);
-      }
-
-      setTotal(180); // 默认 3 分钟
-
-      // Audio controls（可选）
-      playBtn.addEventListener("click", () => {
-        if (audio.paused) {
-          audio.play().catch(() => {});
-          playBtn.innerHTML = '<i class="fa fa-pause"></i>';
-          playIcon.className = "fa fa-pause text-white text-3xl";
-        } else {
-          audio.pause();
-          playBtn.innerHTML = '<i class="fa fa-play"></i>';
-          playIcon.className = "fa fa-play text-white text-3xl";
-        }
-      });
-      audio.addEventListener("timeupdate", () => {
-        seekBar.value = Math.floor(audio.currentTime);
-        cur.textContent = updateTimeDisplay(audio.currentTime);
-      });
-      seekBar.addEventListener("input", () => (audio.currentTime = Number(seekBar.value)));
-      vol.addEventListener("input", () => (audio.volume = Number(vol.value)));
-
-      // 计时练习
-      document.getElementById("startPracticeBtn").addEventListener("click", () => {
-        let sec = 0;
-        clearInterval(timerId);
-        timerId = setInterval(() => {
-          sec += 1;
-          cur.textContent = updateTimeDisplay(sec);
-          seekBar.value = sec;
-          if (sec >= 180) {
-            clearInterval(timerId);
-            const db = loadDB();
-            db.mindfulness.push({ seconds: sec, ts: Date.now() });
-            touchStreak(db);
-            saveDB(db);
-            unlockBadgesIfNeeded(db);
-            renderHome();
-            showToast("练习完成，已记录 3 分钟");
-          }
-        }, 1000);
-      });
-
-      document.getElementById("btnStepBack").addEventListener("click", () => (audio.currentTime = Math.max(0, audio.currentTime - 5)));
-      document.getElementById("btnStepForward").addEventListener("click", () => (audio.currentTime = Math.min(Number(seekBar.max), audio.currentTime + 5)));
-
-      document.getElementById("btnCache").addEventListener("click", () => {
-        const db = loadDB();
-        db.cachedAudio = true;
-        saveDB(db);
-        showToast("已记为离线可用提示（示例）");
-      });
-
-      /*****************
-       * 我的记录列表 & 导出
-       *****************/
-      document.querySelectorAll(".filter-btn").forEach((b) =>
-        b.addEventListener("click", () => {
-          document.querySelectorAll(".filter-btn").forEach((x) => x.classList.replace("bg-primary", "bg-gray-100"));
-          document.querySelectorAll(".filter-btn").forEach((x) => x.classList.replace("text-white", "text-gray-600"));
-          b.classList.replace("bg-gray-100", "bg-primary");
-          b.classList.replace("text-gray-600", "text-white");
-          renderRecordList(b.dataset.filter);
-        })
-      );
-
-      function renderRecordList(filter = "all") {
-        const db = loadDB();
-        const box = document.getElementById("recordList");
-        let items = [];
-
-        if (filter === "all" || filter === "thought") {
-          items = items.concat(db.records.map((r) => ({ type: "thought", ts: r.ts, data: r })));
-        }
-        if (filter === "all" || filter === "emotion") {
-          items = items.concat(db.emotions.map((e) => ({ type: "emotion", ts: e.ts, data: e })));
-        }
-        if (filter === "all" || filter === "experiment") {
-          items = items.concat(db.experiments.map((e) => ({ type: "experiment", ts: e.ts, data: e })));
-        }
-        if (filter === "all" || filter === "mindfulness") {
-          items = items.concat(db.mindfulness.map((m) => ({ type: "mindfulness", ts: m.ts, data: m })));
-        }
-        if (filter === "all" || filter === "assessment") {
-          items = items.concat(db.assessments.map((a) => ({ type: "assessment", ts: a.ts, data: a })));
-        }
-
-        items.sort((a, b) => b.ts - a.ts);
-
-        if (!items.length) {
-          box.innerHTML = `<div class="text-sm text-gray-500">暂无记录</div>`;
-          return;
-        }
-
-        box.innerHTML = items
-          .map((it) => {
-            if (it.type === "thought") {
-              const r = it.data;
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-pencil text-primary text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">自动思维记录</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 line-clamp-2 mb-3">情境：${r.context}… 情绪强度：${r.emotion}分</p>
-                <span class="badge bg-blue-50 text-primary">思维</span>
-              </div>`;
-            }
-            if (it.type === "emotion") {
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-heart-o text-secondary text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">情绪练习完成</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 mb-2">练习：${it.data.card}</p>
-                <span class="badge bg-green-50 text-secondary">练习</span>
-              </div>`;
-            }
-            if (it.type === "experiment") {
-              const e = it.data;
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-flask text-accent text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">行为实验</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 line-clamp-2 mb-2">${e.belief}</p>
-                <span class="badge bg-purple-50 text-purple-600">实验</span>
-              </div>`;
-            }
-            if (it.type === "mindfulness") {
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-headphones text-yellow-500 text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">冥想练习</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 mb-2">时长：${Math.round(it.data.seconds / 60)} 分钟</p>
-                <span class="badge bg-yellow-50 text-yellow-600">冥想</span>
-              </div>`;
-            }
-            if (it.type === "assessment") {
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-question-circle text-pink-500 text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">身心轻测评</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 mb-2">总分：${it.data.score}（9~45）</p>
-                <span class="badge bg-pink-50 text-pink-600">测评</span>
-              </div>`;
-            }
-          })
-          .join("");
-      }
-
-      // 导出所有 CSV
-      document.getElementById("btnExportAll").addEventListener("click", () => {
-        const db = loadDB();
-        const combine = [];
-        db.records.forEach((r) => combine.push(["思维记录", fmtTime(r.ts), r.context, r.thought.replace(/\n/g, " "), (r.evidence || "").replace(/\n/g, " "), r.emotion]));
-        db.emotions.forEach((e) => combine.push(["情绪练习", fmtTime(e.ts), e.card, "", "", ""]));
-        db.experiments.forEach((e) => combine.push(["行为实验", fmtTime(e.ts), e.belief.replace(/\n/g, " "), (e.predict || "").replace(/\n/g, " "), (e.actual || "").replace(/\n/g, " "), ""]));
-        db.mindfulness.forEach((m) => combine.push(["冥想", fmtTime(m.ts), `时长${Math.round(m.seconds / 60)}分钟`, "", "", ""]));
-        db.assessments.forEach((a) => combine.push(["测评", fmtTime(a.ts), `总分${a.score}`, "", "", ""]));
-        if (!combine.length) return showToast("暂无数据可导出");
-
-        const header = ["类型", "时间", "A", "B", "C", "D"];
-        const csv = [header, ...combine].map((r) => r.map((x) => `"${(x + "").replace(/"/g, '""')}"`).join(",")).join("\n");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = "mindfit_all_records.csv"; a.click();
-        URL.revokeObjectURL(url);
-      });
-
-      // 清空数据
-      document.getElementById("btnClearAll").addEventListener("click", () => {
-        if (!confirm("确定要清空所有本地数据吗？此操作不可恢复。")) return;
-        localStorage.removeItem(DB_KEY);
-        showToast("已清空本地数据");
-        renderHome();
-        renderRecordList("all");
-        renderBadges();
-      });
-
-      /*****************
-       * 徽章系统
-       *****************/
-      const BADGE_RULES = [
-        { id: "tr_3", name: "思维记录者", icon: "fa-pencil", color: "text-primary", desc: "完成 3 次自动思维记录", check: (db) => db.records.length >= 3 },
-        { id: "emo_5", name: "情绪调节新手", icon: "fa-heart-o", color: "text-secondary", desc: "完成 5 次情绪练习", check: (db) => db.emotions.length >= 5 },
-        { id: "streak_7", name: "坚持者", icon: "fa-calendar-check-o", color: "text-accent", desc: "连续 7 天使用", check: (db) => db.streak.count >= 7 },
-      ];
-
-      function unlockBadgesIfNeeded(db) {
-        let unlockedName = null;
-        BADGE_RULES.forEach((b) => {
-          if (b.check(db) && !db.badges[b.id]) {
-            db.badges[b.id] = true;
-            unlockedName = b.name;
-          }
-        });
-        saveDB(db);
-        if (unlockedName) {
-          const banner = document.getElementById("badgeBanner");
-          const text = document.getElementById("badgeBannerText");
-          text.textContent = unlockedName;
-          banner.classList.remove("hidden");
-          setTimeout(() => banner.classList.add("hidden"), 3200);
-        }
-      }
-
-      function renderBadges() {
-        const db = loadDB();
-        const unlocked = document.getElementById("badgeUnlocked");
-        const locked = document.getElementById("badgeLocked");
-        const renderCard = (b, dim = false) => `
-          <div class="badge-card bg-white rounded-xl p-4 card-shadow flex flex-col items-center ${dim ? 'opacity-50' : ''}">
-            <div class="w-16 h-16 rounded-full ${dim ? 'bg-gray-100' : 'bg-blue-100'} flex items-center justify-center mb-2">
-              <i class="fa ${b.icon} ${b.color} text-2xl"></i>
-            </div>
-            <h4 class="text-sm font-medium text-center mb-1">${b.name}</h4>
-            <p class="text-xs text-gray-500 text-center mb-2">${b.desc}</p>
-          </div>`;
-        unlocked.innerHTML = BADGE_RULES.filter((b) => db.badges[b.id]).map((b) => renderCard(b)).join("") || `<div class="text-sm text-gray-500">暂无</div>`;
-        locked.innerHTML = BADGE_RULES.filter((b) => !db.badges[b.id]).map((b) => renderCard(b, true)).join("") || `<div class="text-sm text-gray-500">全部解锁啦 🎉</div>`;
-      }
-
-      /*****************
-       * 首页渲染（进度/最近/推荐）
-       *****************/
-      function renderHome() {
-        const db = loadDB();
-        // 进度：粗略用各模块完成量合成
-        const total = db.records.length + db.emotions.length + db.mindfulness.length + db.experiments.length + db.assessments.length;
-        const percent = Math.max(5, Math.min(100, Math.round((total / 20) * 100))); // 20 次完成≈满进度
-        document.getElementById("progressBar").style.width = `${percent}%`;
-
-        // 最近记录：取最近 2 条（思维/练习/冥想/实验/测评混排）
-        const recentBox = document.getElementById("recentList");
-        const all = []
-          .concat(db.records.map((r) => ({ type: "thought", ts: r.ts, tag: "思维", icon: "fa-pencil", color: "text-primary" })))
-          .concat(db.emotions.map((e) => ({ type: "emotion", ts: e.ts, tag: "练习", icon: "fa-heart-o", color: "text-secondary" })))
-          .concat(db.mindfulness.map((m) => ({ type: "mindfulness", ts: m.ts, tag: "冥想", icon: "fa-headphones", color: "text-yellow-500" })))
-          .concat(db.experiments.map((m) => ({ type: "experiment", ts: m.ts, tag: "实验", icon: "fa-flask", color: "text-accent" })))
-          .concat(db.assessments.map((a) => ({ type: "assessment", ts: a.ts, tag: "测评", icon: "fa-question-circle", color: "text-pink-500" })));
-        all.sort((a, b) => b.ts - a.ts);
-        const slice = all.slice(0, 2);
-        if (!slice.length) {
-          recentBox.innerHTML = `<div class="text-sm text-gray-500">暂无记录，先去试试上方的工具卡片吧～</div>`;
-        } else {
-          recentBox.innerHTML = slice
-            .map(
-              (x) => `<div class="bg-white rounded-lg p-4 card-shadow flex items-center justify-between">
-                <div class="flex items-center">
-                  <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                    <i class="fa ${x.icon} ${x.color}"></i>
-                  </div>
-                  <div>
-                    <p class="font-medium">${x.tag}记录</p>
-                    <p class="text-sm text-gray-500">${fmtTime(x.ts)}</p>
-                  </div>
-                </div>
-                <span class="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded-full">${x.tag}</span>
-              </div>`
-            )
-            .join("");
-        }
-
-        // 推荐内容：根据最近一次情绪强度
-        const recBox = document.getElementById("recommendList");
-        const last = db.records.slice(-1)[0];
-        const items =
-          last && last.emotion >= 7
-            ? [
-                { img: 31, title: "焦虑时的 90 秒方法", desc: "识别情绪→深呼吸→放松扫描" },
-                { img: 32, title: "两分钟自我肯定语", desc: "写下 3 条身体功能感恩" },
-              ]
-            : [
-                { img: 33, title: "身体中立入门", desc: "从功能与健康角度看待身体" },
-                { img: 34, title: "正念饮食 5 步", desc: "慢一点，和味道好好相处" },
-              ];
-        recBox.innerHTML = items
-          .map(
-            (r) => `<div class="bg-white rounded-xl overflow-hidden card-shadow">
-              <img src="https://picsum.photos/400/200?random=${r.img}" alt="${r.title}" class="w-full h-40 object-cover">
-              <div class="p-4">
-                <h4 class="font-semibold mb-1">${r.title}</h4>
-                <p class="text-sm text-gray-500 mb-3 line-clamp-2">${r.desc}</p>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-gray-400">2 分钟阅读</span>
-                  <button class="text-primary text-sm">查看</button>
-                </div>
-              </div>
-            </div>`
-          )
-          .join("");
-      }
-
-      // 首次进入，渲染首页
-      renderHome();
-      renderTRPreview();
+    document.querySelectorAll("[data-goto]").forEach(btn=>btn.addEventListener("click",()=>goto(btn.dataset.goto)));
+    document.getElementById("backBtn").addEventListener("click", ()=>{
+      if(historyStack.length>1){ historyStack.pop(); goto(historyStack[historyStack.length-1]); }
     });
-  </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
-  <title>MindFit - 身心焦虑自助工具</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
-    rel="stylesheet"
-  />
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#3B82F6",
-            secondary: "#10B981",
-            accent: "#8B5CF6",
-            neutral: "#F3F4F6",
-            dark: "#1F2937",
-            light: "#F9FAFB",
-          },
-          fontFamily: {
-            sans: ["PingFang SC", "Helvetica Neue", "Arial", "sans-serif"],
-          },
-        },
-      },
-    };
-  </script>
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .card-shadow {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      }
-      .transition-smooth {
-        transition: all 0.3s ease;
-      }
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-      .text-balance {
-        text-wrap: balance;
-      }
-      .btn-primary {
-        @apply w-full py-3 bg-primary text-white rounded-lg font-medium flex items-center justify-center;
-      }
-      .badge {
-        @apply text-xs px-2 py-1 rounded-full;
-      }
+
+    /************ 首页渲染 ************/
+    function renderHome(){
+      const db=loadDB();
+      const total = db.assessments.length + db.records.length + db.emotions.length + db.experiments.length + db.mindfulness.length;
+      const pct = Math.max(5, Math.min(100, Math.round(total/20*100)));
+      document.getElementById("progressBar").style.width = pct+"%";
+
+      // 最近记录两条
+      const items = []
+        .concat(db.assessments.map(a=>({type:"assessment",ts:a.ts})))
+        .concat(db.records.map(r=>({type:"thought",ts:r.ts})))
+        .concat(db.emotions.map(e=>({type:"emotion",ts:e.ts})))
+        .concat(db.experiments.map(e=>({type:"experiment",ts:e.ts})))
+        .concat(db.mindfulness.map(m=>({type:"mindfulness",ts:m.ts})));
+      items.sort((a,b)=>b.ts-a.ts);
+      const pick = items.slice(0,2);
+      const icon = t => t==="assessment"?"fa-question-circle": t==="thought"?"fa-pencil": t==="emotion"?"fa-heart-o": t==="experiment"?"fa-flask":"fa-headphones";
+      const color = t => t==="assessment"?"text-pink-500": t==="thought"?"text-blue-500": t==="emotion"?"text-green-500": t==="experiment"?"text-purple-500":"text-yellow-500";
+      document.getElementById("recentList").innerHTML = pick.length? pick.map(x=>`
+        <div class="bg-white rounded-lg p-3 card-shadow flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center mr-3"><i class="fa ${icon(x.type)} ${color(x.type)}"></i></div>
+            <div>
+              <p class="text-sm font-medium">${x.type==="assessment"?"测评":x.type==="thought"?"思维记录":x.type==="emotion"?"情绪练习":x.type==="experiment"?"行为实验":"冥想"}</p>
+              <p class="text-xs text-gray-500">${fmt(x.ts)}</p>
+            </div>
+          </div>
+          <span class="badge bg-gray-100 text-gray-600">${x.type}</span>
+        </div>`).join("") : `<div class="text-sm text-gray-500">暂无记录，先从上方工具开始吧～</div>`;
+
+      // 推荐：根据最近情绪强度/测评状态
+      const lastTR = db.records.slice(-1)[0];
+      const high = lastTR && lastTR.emotion>=7;
+      const recs = high
+        ? [{t:"立刻试试 4-2-6 呼吸",d:"2 分钟稳定情绪",img:21},{t:"情绪命名清单",d:"给情绪一个名字就会变小",img:22}]
+        : [{t:"身体中立入门",d:"关注功能而非外貌",img:23},{t:"正念饮食 5 步",d:"慢一点，与味道相处",img:24}];
+      document.getElementById("recommendList").innerHTML = recs.map(r=>`
+        <div class="bg-white rounded-xl overflow-hidden card-shadow flex">
+          <img src="https://picsum.photos/120/80?random=${r.img}" class="w-24 h-20 object-cover">
+          <div class="p-3">
+            <p class="font-medium text-sm">${r.t}</p>
+            <p class="text-xs text-gray-500">${r.d}</p>
+          </div>
+        </div>`).join("");
     }
-  </style>
-</head>
 
-<body class="bg-gray-50 font-sans text-dark min-h-screen">
-  <!-- 顶部导航栏 -->
-  <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-    <div class="flex items-center justify-between px-4 py-3">
-      <div class="flex items-center">
-        <button id="backBtn" class="p-2 text-gray-500 hover:text-primary transition-smooth">
-          <i class="fa fa-arrow-left text-lg"></i>
-        </button>
-        <h1 id="pageTitle" class="text-xl font-medium ml-2">MindFit 身心管理</h1>
-      </div>
-      <div class="flex items-center space-x-4">
-        <button class="p-2 text-gray-500 hover:text-primary transition-smooth" data-target="myRecordsPage">
-          <i class="fa fa-list-alt text-lg"></i>
-        </button>
-        <button class="p-2 text-gray-500 hover:text-primary transition-smooth" data-target="myBadgesPage">
-          <i class="fa fa-star-o text-lg"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- 提示 Toast -->
-  <div id="toast" class="fixed left-1/2 -translate-x-1/2 top-16 z-[60] hidden">
-    <div class="bg-gray-900 text-white text-sm px-3 py-2 rounded-md shadow-lg"></div>
-  </div>
-
-  <!-- 主内容区 -->
-  <main class="pt-16 pb-20 min-h-screen">
-    <!-- 首页 -->
-    <section id="homePage" class="page active">
-      <div class="px-4 py-6">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-[clamp(1.5rem,3vw,1.8rem)] font-bold">身心焦虑自助工具</h2>
-          <div class="flex items-center">
-            <span class="text-sm text-gray-500 mr-2">我的进度</span>
-            <div class="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div id="progressBar" class="h-full bg-primary rounded-full" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 功能卡片网格 -->
-        <div class="grid grid-cols-2 gap-4 mb-8">
-          <!-- 轻测评 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="assessmentPage">
-            <div class="w-14 h-14 rounded-full bg-pink-100 flex items-center justify-center mb-3">
-              <i class="fa fa-question-circle text-pink-500 text-xl"></i>
-            </div>
-            <h3 class="text-base font-medium text-center">身心轻测评</h3>
-          </div>
-
-          <!-- 自动思维记录 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="thoughtRecordPage">
-            <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-              <i class="fa fa-pencil text-primary text-xl"></i>
-            </div>
-            <h3 class="text-base font-medium text-center">自动思维记录</h3>
-          </div>
-
-          <!-- 情绪调节卡片 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="emotionRegulationPage">
-            <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-3">
-              <i class="fa fa-heart-o text-secondary text-xl"></i>
-            </div>
-            <h3 class="text-base font-medium text-center">情绪调节卡片</h3>
-          </div>
-
-          <!-- 行为实验指南 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="behaviorExperimentPage">
-            <div class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center mb-3">
-              <i class="fa fa-flask text-accent text-xl"></i>
-            </div>
-            <h3 class="text-base font-medium text-center">行为实验指南</h3>
-          </div>
-
-          <!-- 冥想/正念练习 -->
-          <div class="feature-card bg-white rounded-xl p-5 card-shadow flex flex-col items-center justify-center transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer" data-target="mindfulnessPage">
-            <div class="w-14 h-14 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
-              <i class="fa fa-headphones text-yellow-500 text-xl"></i>
-            </div>
-            <h3 class="text-base font-medium text-center">冥想/正念练习</h3>
-          </div>
-        </div>
-
-        <!-- 最近记录（动态） -->
-        <div class="mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">最近记录</h3>
-            <button class="text-primary text-sm flex items-center" data-target="myRecordsPage">
-              查看全部 <i class="fa fa-angle-right ml-1"></i>
-            </button>
-          </div>
-          <div id="recentList" class="space-y-3"></div>
-        </div>
-
-        <!-- 新解锁徽章（动态） -->
-        <div id="badgeBanner" class="hidden bg-gradient-to-r from-primary to-accent rounded-xl p-5 text-white mb-6">
-          <div class="flex items-start justify-between">
-            <div>
-              <h3 class="text-lg font-semibold mb-1">恭喜解锁新徽章！</h3>
-              <p id="badgeBannerText" class="text-sm opacity-90 mb-3"></p>
-              <button class="bg-white text-primary text-sm px-3 py-1.5 rounded-full font-medium" data-target="myBadgesPage">
-                查看我的徽章
-              </button>
-            </div>
-            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-              <i class="fa fa-star text-2xl"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- 为你推荐（动态） -->
-        <div>
-          <h3 class="text-lg font-semibold mb-4">为你推荐</h3>
-          <div id="recommendList" class="space-y-4"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 身心轻测评 -->
-    <section id="assessmentPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">身心轻测评</h2>
-          <p class="text-gray-500 text-sm">9 题 5 分量表 + BMI & 主观感受，生成个性化建议</p>
-        </div>
-
-        <!-- BMI + 主观感受 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">基础自评</h3>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">身高（cm）</label>
-              <input id="heightInput" type="number" min="80" max="230" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="例如 165" />
-            </div>
-            <div>
-              <label class="block text-sm text-gray-600 mb-1">体重（kg）</label>
-              <input id="weightInput" type="number" min="20" max="250" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="例如 55" />
-            </div>
-          </div>
-          <div class="mt-3">
-            <label class="block text-sm text-gray-600 mb-1">此刻对身体的主观感受</label>
-            <select id="bodyFeel" class="w-full p-3 border border-gray-200 rounded-lg">
-              <option value="">请选择</option>
-              <option value="舒适">舒适</option>
-              <option value="紧绷">紧绷</option>
-              <option value="疲惫">疲惫</option>
-              <option value="不自信">不自信</option>
-            </select>
-          </div>
-          <div class="mt-3 text-sm text-gray-600">
-            <span id="bmiText" class="font-medium"></span>
-          </div>
-        </div>
-
-        <!-- 9题量表 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">9 题量表（1=从不，5=总是）</h3>
-          <div id="qList" class="space-y-3"></div>
-        </div>
-
-        <!-- 结果 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <button id="btnAssess" class="btn-primary"><i class="fa fa-check mr-2"></i>提交并生成建议</button>
-          <div id="assessResult" class="hidden mt-4 border border-gray-100 rounded-lg p-4 bg-gray-50">
-            <p class="text-sm text-gray-600 mb-2">建议 & 今日小任务：</p>
-            <ul id="adviceList" class="list-disc pl-5 space-y-1 text-sm"></ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 自动思维记录 -->
-    <section id="thoughtRecordPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">自动思维记录</h2>
-          <p class="text-gray-500 text-sm">记录并分析你的想法与情绪反应（聚焦身材/自我评价/社交媒体等）</p>
-        </div>
-
-        <!-- 捕捉 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">捕捉</h3>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">情境</label>
-            <select id="trContext" class="w-full p-3 border border-gray-200 rounded-lg">
-              <option value="">请选择或输入情境</option>
-              <option>外貌被评价</option>
-              <option>社交媒体对比</option>
-              <option>体重波动</option>
-              <option>穿衣不自信</option>
-              <option>饮食控制失控</option>
-              <option>自我怀疑</option>
-              <option>家庭沟通</option>
-              <option>其他（请在下方输入）</option>
-            </select>
-            <input id="trContextCustom" type="text" placeholder="如选择'其他'，请在此输入具体情境" class="w-full mt-2 p-3 border border-gray-200 rounded-lg" />
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">当时的想法</label>
-            <textarea id="trThought" placeholder="请描述你当时的想法..." rows="4" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">证据（支持/反对）</label>
-            <textarea id="trEvidence" placeholder="有没有证据支持或反驳这个想法？" rows="3" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <div class="">
-            <div class="flex items-center justify-between mb-2">
-              <label class="block text-sm font-medium text-gray-700">情绪强度</label>
-              <span id="emotionScore" class="text-primary font-semibold">5</span>
-            </div>
-            <input id="trEmotion" type="range" min="1" max="10" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" oninput="document.getElementById('emotionScore').textContent = this.value" />
-            <div class="flex justify-between text-xs text-gray-500 mt-1">
-              <span>轻微</span><span>中等</span><span>强烈</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 操作 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6 space-y-3">
-          <button id="btnSaveTR" class="btn-primary"><i class="fa fa-save mr-2"></i>保存记录</button>
-          <div class="grid grid-cols-2 gap-3">
-            <button id="btnExportCSV" class="py-2 border border-primary text-primary rounded-lg font-medium text-sm"><i class="fa fa-table mr-1"></i>导出 CSV</button>
-            <button id="btnPrint" class="py-2 border border-gray-300 text-gray-700 rounded-lg font-medium text-sm"><i class="fa fa-file-pdf-o mr-1"></i>打印为 PDF</button>
-          </div>
-        </div>
-
-        <!-- 示例输出（改为动态最近一次） -->
-        <div class="bg-white rounded-xl p-5 card-shadow">
-          <h3 class="text-lg font-semibold mb-4">最近一次记录</h3>
-          <div id="trPreview" class="border border-gray-100 rounded-lg p-4 bg-gray-50 text-sm text-gray-700">
-            暂无记录，保存后会显示预览。
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 情绪调节卡片 -->
-    <section id="emotionRegulationPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">情绪调节卡片</h2>
-          <p class="text-gray-500 text-sm">通过简单练习，缓解焦虑、重获平衡</p>
-        </div>
-
-        <!-- 轮播容器 -->
-        <div class="relative mb-8">
-          <div class="carousel-container overflow-x-auto scrollbar-hide pb-4">
-            <div class="carousel-track flex space-x-4 min-w-max px-1">
-              <!-- 卡片 1：深呼吸 -->
-              <div class="emotion-card bg-white rounded-xl overflow-hidden card-shadow w-72 flex-shrink-0" data-card="deepBreath">
-                <div class="h-36 bg-blue-50 relative">
-                  <img src="https://picsum.photos/300/200?random=13" alt="深呼吸练习" class="w-full h-full object-cover opacity-70" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
-                    <h3 class="text-white text-lg font-semibold p-4">深呼吸练习</h3>
-                  </div>
-                </div>
-                <div class="p-4">
-                  <p class="text-sm text-gray-600 mb-4">4-2-6 呼吸：吸气 4 秒 - 停 2 秒 - 呼气 6 秒，重复 5–10 次。</p>
-                  <button class="complete-btn w-full py-2 border border-primary text-primary rounded-lg font-medium text-sm transition-smooth hover:bg-primary hover:text-white">
-                    标记完成
-                  </button>
-                </div>
-              </div>
-
-              <!-- 卡片 2：五感觉察 -->
-              <div class="emotion-card bg-white rounded-xl overflow-hidden card-shadow w-72 flex-shrink-0 opacity-90" data-card="fiveSenses">
-                <div class="h-36 bg-green-50 relative">
-                  <img src="https://picsum.photos/300/200?random=14" alt="五感觉察练习" class="w-full h-full object-cover opacity-70" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
-                    <h3 class="text-white text-lg font-semibold p-4">五感觉察</h3>
-                  </div>
-                  <div class="absolute top-3 right-3 hidden done-sticker bg-green-500 text-white text-xs px-2 py-1 rounded-full">已完成</div>
-                </div>
-                <div class="p-4">
-                  <p class="text-sm text-gray-600 mb-4">说出你看到/摸到/听到/闻到/尝到的 5-4-3-2-1 样东西。</p>
-                  <button class="complete-btn w-full py-2 border border-primary text-primary rounded-lg font-medium text-sm transition-smooth hover:bg-primary hover:text-white">
-                    标记完成
-                  </button>
-                </div>
-              </div>
-
-              <!-- 卡片 3：正念饮食 -->
-              <div class="emotion-card bg-white rounded-xl overflow-hidden card-shadow w-72 flex-shrink-0" data-card="mindfulEating">
-                <div class="h-36 bg-yellow-50 relative">
-                  <img src="https://picsum.photos/300/200?random=15" alt="正念饮食练习" class="w-full h-full object-cover opacity-70" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
-                    <h3 class="text-white text-lg font-semibold p-4">正念饮食</h3>
-                  </div>
-                </div>
-                <div class="p-4">
-                  <p class="text-sm text-gray-600 mb-4">选一颗葡萄干或一小块食物，慢慢观察、嗅闻、品尝，细嚼慢咽。</p>
-                  <button class="complete-btn w-full py-2 border border-primary text-primary rounded-lg font-medium text-sm transition-smooth hover:bg-primary hover:text-white">
-                    标记完成
-                  </button>
-                </div>
-              </div>
-
-              <!-- 卡片 4：情绪命名 -->
-              <div class="emotion-card bg-white rounded-xl overflow-hidden card-shadow w-72 flex-shrink-0" data-card="nameEmotion">
-                <div class="h-36 bg-purple-50 relative">
-                  <img src="https://picsum.photos/300/200?random=16" alt="情绪命名练习" class="w-full h-full object-cover opacity-70" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
-                    <h3 class="text-white text-lg font-semibold p-4">情绪命名</h3>
-                  </div>
-                </div>
-                <div class="p-4">
-                  <p class="text-sm text-gray-600 mb-4">停下 30 秒，辨认情绪并命名：焦虑/紧绷/羞愧/不安…接纳它的存在。</p>
-                  <button class="complete-btn w-full py-2 border border-primary text-primary rounded-lg font-medium text-sm transition-smooth hover:bg-primary hover:text-white">
-                    标记完成
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- 指示器 -->
-          <div class="flex justify-center mt-4 space-x-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
-          </div>
-        </div>
-
-        <!-- 练习统计（动态） -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">练习进度</h3>
-          <div class="flex justify-between items-center mb-4">
-            <div>
-              <p class="text-sm text-gray-500">本周已完成</p>
-              <p id="statWeek" class="text-xl font-bold">0/7</p>
-            </div>
-            <div class="w-16 h-16 rounded-full border-4 border-primary/20 flex items-center justify-center">
-              <div class="text-center">
-                <p class="text-xs text-gray-500">连续天数</p>
-                <p id="statStreak" class="text-lg font-bold text-primary">0</p>
-              </div>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500">总完成次数</p>
-              <p id="statTotal" class="text-xl font-bold">0</p>
-            </div>
-          </div>
-          <div class="w-full bg-gray-100 rounded-full h-2.5">
-            <div id="statBar" class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
-          </div>
-        </div>
-
-        <!-- 相关推荐（动态） -->
-        <div>
-          <h3 class="text-lg font-semibold mb-4">相关推荐</h3>
-          <div id="emotionRecs" class="space-y-4"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 行为实验指南 -->
-    <section id="behaviorExperimentPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">行为实验指南</h2>
-          <p class="text-gray-500 text-sm">用小实验验证焦虑性信念，获得新证据</p>
-        </div>
-
-        <!-- 说明 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-3">什么是行为实验？</h3>
-          <div class="prose prose-sm text-gray-700">
-            <p>行为实验是 CBT 的核心技术：设计并执行小型、低风险的行动，验证“我担心的事是否真的会发生”。</p>
-            <ul class="list-disc pl-5 space-y-1 mt-1">
-              <li>发现认知与现实的差距</li>
-              <li>收集反证，挑战不合理信念</li>
-              <li>通过体验形成新的、更健康的认知</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- 记录模板 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">实验记录</h3>
-            <span class="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full">自动保存</span>
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">我的担忧信念</label>
-            <textarea id="bxBelief" rows="3" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="例如：如果我在朋友面前吃东西，他们会觉得我失控…"></textarea>
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">小步尝试设计</label>
-            <div class="space-y-3">
-              <input id="bxStep1" type="text" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="第一步：例如，在熟悉的环境下与好友一起吃一小份点心…" />
-              <input id="bxStep2" type="text" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="第二步：……" />
-              <input id="bxStep3" type="text" class="w-full p-3 border border-gray-200 rounded-lg" placeholder="第三步：……" />
-            </div>
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">我预测会发生什么？</label>
-            <textarea id="bxPredict" rows="2" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">实际结果记录</label>
-            <textarea id="bxActual" rows="3" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <div class="mb-3">
-            <label class="block text-sm font-medium text-gray-700 mb-2">结论与新的认识</label>
-            <textarea id="bxLearn" rows="3" class="w-full p-3 border border-gray-200 rounded-lg"></textarea>
-          </div>
-
-          <button id="btnSaveBX" class="btn-primary"><i class="fa fa-save mr-2"></i>保存实验记录</button>
-        </div>
-
-        <!-- 历史实验（动态） -->
-        <div class="mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">历史实验记录</h3>
-            <button class="text-primary text-sm" id="btnViewAllBX">查看全部</button>
-          </div>
-          <div id="bxList" class="space-y-3"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 冥想/正念练习 -->
-    <section id="mindfulnessPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">冥想/正念练习</h2>
-          <p class="text-gray-500 text-sm">3–5 分钟引导，随时进入平静</p>
-        </div>
-
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <div class="flex flex-col items-center">
-            <audio id="audio" preload="none">
-              <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
-            </audio>
-
-            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-purple-400 to-primary flex items-center justify-center mb-5">
-              <i class="fa fa-play text-white text-3xl" id="playPauseIcon"></i>
-            </div>
-
-            <h3 class="text-lg font-semibold mb-1">3 分钟呼吸冥想</h3>
-            <p class="text-sm text-gray-500 mb-5">如果音频加载慢，可仅用计时练习</p>
-
-            <div class="w-full mb-4">
-              <div class="flex justify-between text-xs text-gray-500 mb-1">
-                <span id="currentTime">00:00</span>
-                <span id="totalTime">03:00</span>
-              </div>
-              <input id="seekBar" type="range" min="0" max="180" value="0" class="w-full h-1.5 bg-gray-200 rounded-lg accent-primary" />
-            </div>
-
-            <div class="flex items-center justify-between w-full max-w-xs">
-              <button id="btnStepBack" class="text-gray-500 hover:text-primary transition-smooth">
-                <i class="fa fa-step-backward"></i>
-              </button>
-              <button id="playPauseBtn" class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center">
-                <i class="fa fa-play"></i>
-              </button>
-              <button id="btnStepForward" class="text-gray-500 hover:text-primary transition-smooth">
-                <i class="fa fa-step-forward"></i>
-              </button>
-            </div>
-
-            <div class="w-full mt-5 flex items-center">
-              <i class="fa fa-volume-up text-gray-500 mr-2"></i>
-              <input id="volumeBar" type="range" min="0" max="1" step="0.01" value="0.7" class="w-full h-1 bg-gray-200 rounded-lg accent-primary" />
-            </div>
-
-            <button id="btnCache" class="mt-5 text-sm text-primary flex items-center">
-              <i class="fa fa-download mr-1"></i> 记为已缓存（离线提示）
-            </button>
-          </div>
-        </div>
-
-        <!-- 文字指导 -->
-        <div class="bg-white rounded-xl p-5 card-shadow mb-6">
-          <h3 class="text-lg font-semibold mb-3">练习指导</h3>
-          <p class="text-sm text-gray-600">找一个安静、舒适的环境，保持自然呼吸。当注意力走神时，温和地把它带回呼吸，不评判自己。</p>
-          <button id="startPracticeBtn" class="w-full mt-5 py-3 bg-primary text-white rounded-lg font-medium">
-            开始计时练习（3 分钟）
-          </button>
-        </div>
-
-        <!-- 更多练习 -->
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">更多练习</h3>
-            <button class="text-primary text-sm">查看全部</button>
-          </div>
-          <div class="space-y-3">
-            <div class="bg-white rounded-lg p-4 card-shadow flex items-center">
-              <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <i class="fa fa-headphones text-secondary"></i>
-              </div>
-              <div class="flex-grow">
-                <h4 class="font-medium">5 分钟身体扫描</h4>
-                <p class="text-xs text-gray-500">关注身体感受，释放紧张</p>
-              </div>
-              <div class="flex-shrink-0">
-                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full mr-2">5:00</span>
-                <button class="text-primary"><i class="fa fa-play-circle-o"></i></button>
-              </div>
-            </div>
-            <div class="bg-white rounded-lg p-4 card-shadow flex items-center">
-              <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <i class="fa fa-headphones text-accent"></i>
-              </div>
-              <div class="flex-grow">
-                <h4 class="font-medium">睡前放松冥想</h4>
-                <p class="text-xs text-gray-500">缓解入睡困难</p>
-              </div>
-              <div class="flex-shrink-0">
-                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full mr-2">8:00</span>
-                <button class="text-primary"><i class="fa fa-play-circle-o"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 我的记录 -->
-    <section id="myRecordsPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">我的记录</h2>
-          <p class="text-gray-500 text-sm">查看与管理你的所有记录</p>
-        </div>
-
-        <!-- 筛选 -->
-        <div class="bg-white rounded-xl p-4 card-shadow mb-6">
-          <div class="flex flex-wrap gap-2 mb-3">
-            <button data-filter="all" class="filter-btn px-3 py-1.5 bg-primary text-white text-sm rounded-full">全部记录</button>
-            <button data-filter="thought" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">自动思维</button>
-            <button data-filter="emotion" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">情绪练习</button>
-            <button data-filter="experiment" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">行为实验</button>
-            <button data-filter="mindfulness" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">冥想</button>
-            <button data-filter="assessment" class="filter-btn px-3 py-1.5 bg-gray-100 text-gray-600 text-sm rounded-full">测评</button>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <i class="fa fa-calendar text-gray-500 mr-2"></i>
-              <span class="text-sm text-gray-600">最近 30 天</span>
-            </div>
-            <div class="space-x-2">
-              <button id="btnExportAll" class="text-primary text-sm"><i class="fa fa-download mr-1"></i>导出所有 CSV</button>
-              <button id="btnClearAll" class="text-red-500 text-sm"><i class="fa fa-trash-o mr-1"></i>清空所有数据</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 列表 -->
-        <div id="recordList" class="space-y-3"></div>
-      </div>
-    </section>
-
-    <!-- 我的徽章 -->
-    <section id="myBadgesPage" class="page hidden">
-      <div class="px-4 py-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold mb-2">我的徽章</h2>
-          <p class="text-gray-500 text-sm">记录你的坚持与进步</p>
-        </div>
-
-        <div class="mb-8">
-          <h3 class="text-lg font-semibold mb-4">已解锁</h3>
-          <div id="badgeUnlocked" class="grid grid-cols-3 gap-4"></div>
-        </div>
-
-        <div>
-          <h3 class="text-lg font-semibold mb-4">待解锁</h3>
-          <div id="badgeLocked" class="grid grid-cols-3 gap-4"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- 底部导航 -->
-  <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-40">
-    <div class="flex justify-around items-center py-3">
-      <button class="nav-btn flex flex-col items-center text-primary" data-target="homePage">
-        <i class="fa fa-home text-lg mb-1"></i><span class="text-xs">首页</span>
-      </button>
-      <button class="nav-btn flex flex-col items-center text-gray-500" data-target="emotionRegulationPage">
-        <i class="fa fa-heart text-lg mb-1"></i><span class="text-xs">练习</span>
-      </button>
-      <button class="nav-btn flex flex-col items-center text-gray-500" data-target="myRecordsPage">
-        <i class="fa fa-book text-lg mb-1"></i><span class="text-xs">记录</span>
-      </button>
-      <button class="nav-btn flex flex-col items-center text-gray-500" data-target="myBadgesPage">
-        <i class="fa fa-star-o text-lg mb-1"></i><span class="text-xs">徽章</span>
-      </button>
-    </div>
-  </footer>
-
-  <script>
-    /*****************
-     * 基础工具 & 存储
-     *****************/
-    const DB_KEY = "mindfit_db_v1";
-
-    const defaultDB = () => ({
-      records: [],          // 思维记录
-      emotions: [],         // 情绪练习完成 {card, ts}
-      experiments: [],      // 行为实验
-      mindfulness: [],      // 冥想练习 {seconds, ts}
-      assessments: [],      // 测评结果
-      badges: {},           // 徽章布尔
-      streak: { count: 0, lastDate: "" }, // 连续天数
-      cachedAudio: false,   // 冥想音频缓存标记（提示用）
-    });
-
-    const loadDB = () => {
-      try {
-        const raw = localStorage.getItem(DB_KEY);
-        return raw ? JSON.parse(raw) : defaultDB();
-      } catch (e) {
-        return defaultDB();
-      }
-    };
-
-    const saveDB = (db) => localStorage.setItem(DB_KEY, JSON.stringify(db));
-
-    const todayStr = () => {
-      const d = new Date();
-      return d.toISOString().slice(0, 10);
-    };
-
-    const fmtTime = (ts) => {
-      const d = new Date(ts);
-      const pad = (n) => (n < 10 ? "0" + n : n);
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    };
-
-    const showToast = (msg) => {
-      const wrap = document.getElementById("toast");
-      const box = wrap.firstElementChild;
-      box.textContent = msg;
-      wrap.classList.remove("hidden");
-      setTimeout(() => wrap.classList.add("hidden"), 1800);
-    };
-
-    // streak 更新：每天任意操作一次记为活跃
-    const touchStreak = (db) => {
-      const t = todayStr();
-      if (db.streak.lastDate === t) return;
-      // 判断是否连续
-      const last = db.streak.lastDate ? new Date(db.streak.lastDate) : null;
-      const y = new Date(t);
-      const one = 24 * 60 * 60 * 1000;
-      const isConsecutive = last && (y - last) / one === 1;
-      db.streak.count = isConsecutive ? (db.streak.count + 1) : 1;
-      db.streak.lastDate = t;
-    };
-
-    /*****************
-     * 页面导航
-     *****************/
-    document.addEventListener("DOMContentLoaded", () => {
-      const pages = document.querySelectorAll(".page");
-      const backBtn = document.getElementById("backBtn");
-      const pageTitle = document.getElementById("pageTitle");
-      const featureCards = document.querySelectorAll(".feature-card");
-      const otherLinks = document.querySelectorAll("[data-target]");
-      const navBtns = document.querySelectorAll(".nav-btn");
-
-      let pageHistory = ["homePage"];
-
-      const titleMap = {
-        homePage: "MindFit 身心管理",
-        assessmentPage: "身心轻测评",
-        thoughtRecordPage: "自动思维记录",
-        emotionRegulationPage: "情绪调节卡片",
-        behaviorExperimentPage: "行为实验指南",
-        mindfulnessPage: "冥想/正念练习",
-        myRecordsPage: "我的记录",
-        myBadgesPage: "我的徽章",
+    /************ 轻测评 ************/
+    // 题库（来自你提供的轻测评；Q9 为准备度）
+    const LIGHT_Q = [
+      "照镜子或翻看照片时，我会特别关注自己的某些身体部位。",
+      "在社交平台上，我会不由自主地把自己和“好身材”照片相比。",
+      "吃完喜欢的食物后，我会感到后悔或愧疚。",
+      "如果对自己的外貌不满意，我会情绪低落或心情受到影响。",
+      "我会给自己制定严格的饮食或运动计划，若未完成会自责。",
+      "因为担心身材，我会避免拍照或参加社交活动。",
+      "我觉得“如果变得更好看，生活会更顺利”这类想法有一定道理。",
+      "我想摆脱这些焦虑想法，但不知道从哪里开始。",
+      "如果有简单可操作的心理自助练习（例如思维记录、情绪卡片等），我愿意尝试。（准备度）"
+    ];
+
+    function renderLightQuestions(){
+      // BMI 文本
+      const bmiText = document.getElementById("lightBMIText");
+      const updateBMI = ()=>{
+        const h = parseFloat(document.getElementById("lightHeight").value)||0;
+        const w = parseFloat(document.getElementById("lightWeight").value)||0;
+        if(!h||!w){ bmiText.textContent=""; return; }
+        const bmi = (w/Math.pow(h/100,2)).toFixed(1);
+        let tip="关注身体功能而非数字。";
+        if(bmi<18.5) tip="可能偏瘦，注意营养补充与温和活动。";
+        else if(bmi<24) tip="总体良好，保持均衡与觉察。";
+        else if(bmi<28) tip="建议循序渐进地调整饮食与活动。";
+        else tip="建议在专业指导下稳步管理与监测。";
+        bmiText.textContent=`BMI≈${bmi}，${tip}`;
       };
+      document.getElementById("lightHeight").oninput = updateBMI;
+      document.getElementById("lightWeight").oninput = updateBMI;
 
-      function navigateTo(id) {
-        pages.forEach((p) => p.classList.add("hidden"));
-        const target = document.getElementById(id);
-        if (!target) return;
-        target.classList.remove("hidden");
-        pageTitle.textContent = titleMap[id] || "MindFit";
-        if (pageHistory[pageHistory.length - 1] !== id) pageHistory.push(id);
-        window.scrollTo(0, 0);
-        // 进入页面时渲染
-        switch (id) {
-          case "homePage":
-            renderHome();
-            break;
-          case "thoughtRecordPage":
-            renderTRPreview();
-            break;
-          case "emotionRegulationPage":
-            renderEmotionStats();
-            renderEmotionRecs();
-            break;
-          case "behaviorExperimentPage":
-            renderBXList();
-            break;
-          case "myRecordsPage":
-            renderRecordList("all");
-            break;
-          case "myBadgesPage":
-            renderBadges();
-            break;
-          case "assessmentPage":
-            renderAssessment();
-            break;
-        }
-      }
-
-      featureCards.forEach((c) => c.addEventListener("click", () => navigateTo(c.dataset.target)));
-      otherLinks.forEach((c) => c.addEventListener("click", () => navigateTo(c.dataset.target)));
-      navBtns.forEach((c) => c.addEventListener("click", () => navigateTo(c.dataset.target)));
-
-      backBtn.addEventListener("click", () => {
-        if (pageHistory.length > 1) {
-          pageHistory.pop();
-          navigateTo(pageHistory[pageHistory.length - 1]);
-        }
-      });
-
-      /*****************
-       * 轻测评（9题）
-       *****************/
-      const QUESTIONS = [
-        "我经常因为身材/外貌而感到焦虑",
-        "我会把自己和社交媒体上的“完美身材”比较",
-        "当控制饮食失败时，我会强烈自责",
-        "我会因为情绪而吃得过多或过少",
-        "我对自己的身体功能（而非外貌）感到满足",
-        "紧张时，我能通过呼吸/放松让自己好受一些",
-        "我能温柔地和自己说话（而不是苛责）",
-        "我愿意尝试小任务来改变一点点习惯",
-        "我能识别并命名当下的情绪",
-      ];
-
-      function renderAssessment() {
-        // BMI 文本
-        const h = document.getElementById("heightInput");
-        const w = document.getElementById("weightInput");
-        const bmiText = document.getElementById("bmiText");
-        const updateBMI = () => {
-          const hv = parseFloat(h.value) || 0;
-          const wv = parseFloat(w.value) || 0;
-          if (!hv || !wv) {
-            bmiText.textContent = "";
-            return;
-          }
-          const bmi = (wv / Math.pow(hv / 100, 2)).toFixed(1);
-          let label = "功能健康角度：关注身体能做什么，而非数字。";
-          if (bmi < 18.5) label = "提示：可能偏瘦，注意营养与能量补充。";
-          else if (bmi < 24) label = "提示：总体良好，继续保持均衡与觉察。";
-          else if (bmi < 28) label = "提示：适度调整饮食与活动，循序渐进。";
-          else label = "提示：建议在专业指导下稳步管理与监测。";
-          bmiText.textContent = `BMI≈${bmi}。${label}`;
-        };
-        h.oninput = updateBMI;
-        w.oninput = updateBMI;
-
-        // 渲染 9 题
-        const qList = document.getElementById("qList");
-        if (!qList.dataset.rendered) {
-          qList.innerHTML = QUESTIONS.map((q, i) => {
-            return `<div>
-                <label class="block text-sm text-gray-700 mb-1">${i + 1}. ${q}</label>
-                <input type="range" min="1" max="5" value="3" class="w-full h-2 bg-gray-200 rounded-lg accent-primary assess-item" data-idx="${i}">
-                <div class="flex justify-between text-xs text-gray-400"><span>1 从不</span><span>5 总是</span></div>
-              </div>`;
-          }).join("");
-          qList.dataset.rendered = "1";
-        }
-      }
-
-      document.getElementById("btnAssess").addEventListener("click", () => {
-        const db = loadDB();
-        const vals = [...document.querySelectorAll(".assess-item")].map((x) => Number(x.value));
-        if (vals.length !== QUESTIONS.length) {
-          showToast("请完成所有题目");
-          return;
-        }
-        const height = parseFloat(document.getElementById("heightInput").value) || null;
-        const weight = parseFloat(document.getElementById("weightInput").value) || null;
-        const bodyFeel = document.getElementById("bodyFeel").value || "";
-
-        const score = vals.reduce((a, b) => a + b, 0); // 9~45
-        const ts = Date.now();
-
-        // 生成建议
-        const advice = [];
-        if (score >= 30) advice.push("建议优先使用：深呼吸 + 五感觉察，每天 2 次，每次 2 分钟。");
-        if (score < 30) advice.push("建议维持：每日 1 次正念呼吸 + 一次自我肯定语。");
-        if (bodyFeel === "不自信") advice.push("阅读：身体中立入门，尝试写下 3 条身体功能感恩。");
-        if (bodyFeel === "紧绷") advice.push("今日小任务：4-2-6 呼吸 10 轮，放松肩颈伸展 5 分钟。");
-        if (bodyFeel === "疲惫") advice.push("今日小任务：早点休息；晚间 3 分钟冥想。");
-
-        db.assessments.push({
-          ts,
-          score,
-          vals,
-          height,
-          weight,
-          bodyFeel,
-        });
-        touchStreak(db);
-        saveDB(db);
-        unlockBadgesIfNeeded(db);
-        renderHome();
-
-        const box = document.getElementById("assessResult");
-        const ul = document.getElementById("adviceList");
-        ul.innerHTML = advice.map((t) => `<li>${t}</li>`).join("");
-        box.classList.remove("hidden");
-        showToast("测评完成，已为你生成建议");
-      });
-
-      /*****************
-       * 自动思维记录
-       *****************/
-      const btnSaveTR = document.getElementById("btnSaveTR");
-      btnSaveTR.addEventListener("click", () => {
-        const contextSel = document.getElementById("trContext").value;
-        const contextCustom = document.getElementById("trContextCustom").value.trim();
-        const thought = document.getElementById("trThought").value.trim();
-        const evidence = document.getElementById("trEvidence").value.trim();
-        const emotion = Number(document.getElementById("trEmotion").value) || 5;
-        const ctx = contextSel.includes("其他") ? (contextCustom || "未填写") : (contextSel || contextCustom);
-
-        if (!thought) return showToast("请先填写当时的想法～");
-
-        const db = loadDB();
-        db.records.push({
-          ts: Date.now(),
-          context: ctx || "未填写",
-          thought,
-          evidence,
-          emotion,
-        });
-        touchStreak(db);
-        saveDB(db);
-        unlockBadgesIfNeeded(db);
-        renderTRPreview();
-        renderHome();
-        showToast("已保存到本地记录");
-      });
-
-      function renderTRPreview() {
-        const db = loadDB();
-        const box = document.getElementById("trPreview");
-        if (!db.records.length) {
-          box.textContent = "暂无记录，保存后会显示预览。";
-          return;
-        }
-        const r = db.records[db.records.length - 1];
-        box.innerHTML = `
-          <div class="flex justify-between items-start mb-3">
-            <span class="text-sm text-gray-500">记录时间</span>
-            <span class="text-sm font-medium">${fmtTime(r.ts)}</span>
+      // 渲染题目
+      const box = document.getElementById("lightQuestions");
+      if(box.dataset.rendered==="1") return;
+      box.innerHTML = LIGHT_Q.map((q,i)=>`
+        <div class="bg-white rounded-xl p-4 card-shadow">
+          <div class="text-sm mb-2">${i+1}. ${q}</div>
+          <div class="grid grid-cols-5 gap-2 text-center text-xs">
+            ${[1,2,3,4,5].map(v=>`
+              <label class="border rounded-lg py-2">
+                <input type="radio" name="lq${i}" value="${v}" class="hidden">
+                <div>${v===1?"从不":v===2?"偶尔":v===3?"有时":v===4?"经常":"总是"}</div>
+              </label>`).join("")}
           </div>
-          <div class="mb-2"><span class="text-sm text-gray-500 block mb-1">情境</span><p class="text-sm">${r.context}</p></div>
-          <div class="mb-2"><span class="text-sm text-gray-500 block mb-1">当时的想法</span><p class="text-sm">${r.thought || "-"}</p></div>
-          <div class="mb-2"><span class="text-sm text-gray-500 block mb-1">证据</span><p class="text-sm">${r.evidence || "-"}</p></div>
-          <div><span class="text-sm text-gray-500 block mb-1">情绪强度</span>
-            <div class="flex items-center">
-              <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden mr-2">
-                <div class="h-full bg-red-400 rounded-full" style="width:${r.emotion * 10}%"></div>
-              </div>
-              <span class="text-sm font-medium">${r.emotion} 分</span>
-            </div>
-          </div>
-        `;
+        </div>
+      `).join("");
+      box.dataset.rendered="1";
+    }
+
+    function getLightValues(){
+      const vals = [];
+      for(let i=0;i<LIGHT_Q.length;i++){
+        const sel = document.querySelector(`input[name="lq${i}"]:checked`);
+        if(!sel) return null;
+        vals.push(Number(sel.value));
       }
+      return vals;
+    }
 
-      // 导出 CSV（思维记录）
-      document.getElementById("btnExportCSV").addEventListener("click", () => {
-        const { records } = loadDB();
-        if (!records.length) return showToast("暂无数据可导出");
-        const header = ["时间", "情境", "想法", "证据", "情绪强度"];
-        const rows = records.map((r) => [fmtTime(r.ts), r.context, r.thought.replace(/\n/g, " "), (r.evidence || "").replace(/\n/g, " "), r.emotion]);
-        const csv = [header, ...rows].map((r) => r.map((x) => `"${(x + "").replace(/"/g, '""')}"`).join(",")).join("\n");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "mindfit_thought_records.csv";
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-
-      // 打印为 PDF（浏览器端）
-      document.getElementById("btnPrint").addEventListener("click", () => {
-        const win = window.open("", "_blank");
-        const { records } = loadDB();
-        win.document.write(`<html><head><title>思维记录打印</title></head><body><h2>思维记录</h2>`);
-        if (!records.length) {
-          win.document.write("<p>暂无记录</p>");
-        } else {
-          records.forEach((r) => {
-            win.document.write(`<div style="margin:12px 0;padding:12px;border:1px solid #eee">
-              <div><b>时间：</b>${fmtTime(r.ts)}</div>
-              <div><b>情境：</b>${r.context}</div>
-              <div><b>想法：</b>${r.thought.replace(/\n/g, "<br/>")}</div>
-              <div><b>证据：</b>${(r.evidence || "").replace(/\n/g, "<br/>")}</div>
-              <div><b>情绪强度：</b>${r.emotion} 分</div>
-            </div>`);
-          });
-        }
-        win.document.write(`</body></html>`);
-        win.document.close();
-        win.focus();
-        win.print();
-      });
-
-      /*****************
-       * 情绪练习
-       *****************/
-      document.querySelectorAll(".complete-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const card = btn.closest(".emotion-card");
-          const cardId = card?.dataset?.card || "unknown";
-          const db = loadDB();
-          db.emotions.push({ card: cardId, ts: Date.now() });
-          touchStreak(db);
-          saveDB(db);
-          unlockBadgesIfNeeded(db);
-          renderEmotionStats();
-          renderHome();
-
-          // 视觉标记
-          card.classList.add("opacity-60");
-          const sticker = card.querySelector(".done-sticker");
-          if (sticker) sticker.classList.remove("hidden");
-          btn.innerHTML = "已完成";
-          btn.classList.remove("border-primary", "text-primary", "hover:bg-primary", "hover:text-white");
-          btn.classList.add("border-gray-300", "text-gray-500", "bg-gray-100");
-          showToast("已标记完成！");
-        });
-      });
-
-      function calcWeekStats(items) {
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay()); // 周日为 0
-        const cnt = items.filter((x) => new Date(x.ts) >= startOfWeek).length;
-        return cnt;
-      }
-
-      function renderEmotionStats() {
-        const db = loadDB();
-        const week = calcWeekStats(db.emotions);
-        const total = db.emotions.length;
-        document.getElementById("statWeek").textContent = `${Math.min(7, week)}/7`;
-        document.getElementById("statTotal").textContent = total;
-        document.getElementById("statStreak").textContent = db.streak.count;
-        document.getElementById("statBar").style.width = `${Math.min(100, (week / 7) * 100)}%`;
-      }
-
-      function renderEmotionRecs() {
-        const db = loadDB();
-        const list = document.getElementById("emotionRecs");
-        // 简单推荐：若最近情绪强度>=7，优先推荐呼吸 & 情绪命名；否则推荐正念饮食
-        const lastTR = db.records.slice(-1)[0];
-        const high = lastTR && lastTR.emotion >= 7;
-        const recs = high
-          ? [
-              { title: "立刻试试 4-2-6 呼吸", desc: "2 分钟快速稳定情绪", tag: "应急", img: 21 },
-              { title: "情绪命名清单", desc: "给情绪一个名字就会变小", tag: "情绪", img: 22 },
-            ]
-          : [
-              { title: "正念饮食入门", desc: "从一颗葡萄干开始", tag: "正念", img: 23 },
-              { title: "身体中立 3 步", desc: "关注功能而非外貌", tag: "理念", img: 24 },
-            ];
-        list.innerHTML = recs
-          .map(
-            (r) => `<div class="bg-white rounded-xl overflow-hidden card-shadow flex">
-              <img src="https://picsum.photos/120/120?random=${r.img}" class="w-24 h-24 object-cover flex-shrink-0" alt="${r.title}">
-              <div class="p-3 flex-grow">
-                <h4 class="font-medium text-sm mb-1">${r.title}</h4>
-                <p class="text-xs text-gray-500 mb-2 line-clamp-2">${r.desc}</p>
-                <span class="badge bg-blue-50 text-primary">${r.tag}</span>
-              </div>
-            </div>`
-          )
-          .join("");
-      }
-
-      /*****************
-       * 行为实验
-       *****************/
-      document.getElementById("btnSaveBX").addEventListener("click", () => {
-        const db = loadDB();
-        const item = {
-          ts: Date.now(),
-          belief: document.getElementById("bxBelief").value.trim(),
-          steps: [document.getElementById("bxStep1").value.trim(), document.getElementById("bxStep2").value.trim(), document.getElementById("bxStep3").value.trim()].filter(Boolean),
-          predict: document.getElementById("bxPredict").value.trim(),
-          actual: document.getElementById("bxActual").value.trim(),
-          learn: document.getElementById("bxLearn").value.trim(),
-        };
-        if (!item.belief) return showToast("请先填写担忧信念");
-        db.experiments.push(item);
-        touchStreak(db);
-        saveDB(db);
-        unlockBadgesIfNeeded(db);
-        renderBXList();
-        showToast("实验已保存");
-      });
-
-      function renderBXList() {
-        const db = loadDB();
-        const box = document.getElementById("bxList");
-        if (!db.experiments.length) {
-          box.innerHTML = `<div class="text-sm text-gray-500">暂无记录</div>`;
-          return;
-        }
-        box.innerHTML = db.experiments
-          .slice(-3)
-          .reverse()
-          .map(
-            (e) => `<div class="bg-white rounded-lg p-4 card-shadow">
-            <div class="flex justify-between items-start mb-2">
-              <h4 class="font-medium">实验：${e.belief.slice(0, 16)}${e.belief.length > 16 ? "..." : ""}</h4>
-              <span class="text-xs text-gray-500">${fmtTime(e.ts)}</span>
-            </div>
-            <p class="text-sm text-gray-600 line-clamp-2 mb-2">${e.predict ? "预测：" + e.predict : ""}</p>
-            <div class="flex justify-between items-center">
-              <span class="badge bg-green-50 text-green-600">已保存</span>
-            </div>
-          </div>`
-          )
-          .join("");
-      }
-
-      /*****************
-       * 冥想/正念
-       *****************/
-      const audio = document.getElementById("audio");
-      const playBtn = document.getElementById("playPauseBtn");
-      const playIcon = document.getElementById("playPauseIcon");
-      const seekBar = document.getElementById("seekBar");
-      const vol = document.getElementById("volumeBar");
-      const cur = document.getElementById("currentTime");
-      const total = document.getElementById("totalTime");
-
-      let timerId = null;
-
-      function updateTimeDisplay(sec) {
-        const m = String(Math.floor(sec / 60)).padStart(2, "0");
-        const s = String(Math.floor(sec % 60)).padStart(2, "0");
-        return `${m}:${s}`;
-      }
-
-      function setTotal(sec) {
-        total.textContent = updateTimeDisplay(sec);
-        seekBar.max = String(sec);
-      }
-
-      setTotal(180); // 默认 3 分钟
-
-      // Audio controls（可选）
-      playBtn.addEventListener("click", () => {
-        if (audio.paused) {
-          audio.play().catch(() => {});
-          playBtn.innerHTML = '<i class="fa fa-pause"></i>';
-          playIcon.className = "fa fa-pause text-white text-3xl";
-        } else {
-          audio.pause();
-          playBtn.innerHTML = '<i class="fa fa-play"></i>';
-          playIcon.className = "fa fa-play text-white text-3xl";
-        }
-      });
-      audio.addEventListener("timeupdate", () => {
-        seekBar.value = Math.floor(audio.currentTime);
-        cur.textContent = updateTimeDisplay(audio.currentTime);
-      });
-      seekBar.addEventListener("input", () => (audio.currentTime = Number(seekBar.value)));
-      vol.addEventListener("input", () => (audio.volume = Number(vol.value)));
-
-      // 计时练习
-      document.getElementById("startPracticeBtn").addEventListener("click", () => {
-        let sec = 0;
-        clearInterval(timerId);
-        timerId = setInterval(() => {
-          sec += 1;
-          cur.textContent = updateTimeDisplay(sec);
-          seekBar.value = sec;
-          if (sec >= 180) {
-            clearInterval(timerId);
-            const db = loadDB();
-            db.mindfulness.push({ seconds: sec, ts: Date.now() });
-            touchStreak(db);
-            saveDB(db);
-            unlockBadgesIfNeeded(db);
-            renderHome();
-            showToast("练习完成，已记录 3 分钟");
-          }
-        }, 1000);
-      });
-
-      document.getElementById("btnStepBack").addEventListener("click", () => (audio.currentTime = Math.max(0, audio.currentTime - 5)));
-      document.getElementById("btnStepForward").addEventListener("click", () => (audio.currentTime = Math.min(Number(seekBar.max), audio.currentTime + 5)));
-
-      document.getElementById("btnCache").addEventListener("click", () => {
-        const db = loadDB();
-        db.cachedAudio = true;
-        saveDB(db);
-        showToast("已记为离线可用提示（示例）");
-      });
-
-      /*****************
-       * 我的记录列表 & 导出
-       *****************/
-      document.querySelectorAll(".filter-btn").forEach((b) =>
-        b.addEventListener("click", () => {
-          document.querySelectorAll(".filter-btn").forEach((x) => x.classList.replace("bg-primary", "bg-gray-100"));
-          document.querySelectorAll(".filter-btn").forEach((x) => x.classList.replace("text-white", "text-gray-600"));
-          b.classList.replace("bg-gray-100", "bg-primary");
-          b.classList.replace("text-gray-600", "text-white");
-          renderRecordList(b.dataset.filter);
-        })
-      );
-
-      function renderRecordList(filter = "all") {
-        const db = loadDB();
-        const box = document.getElementById("recordList");
-        let items = [];
-
-        if (filter === "all" || filter === "thought") {
-          items = items.concat(db.records.map((r) => ({ type: "thought", ts: r.ts, data: r })));
-        }
-        if (filter === "all" || filter === "emotion") {
-          items = items.concat(db.emotions.map((e) => ({ type: "emotion", ts: e.ts, data: e })));
-        }
-        if (filter === "all" || filter === "experiment") {
-          items = items.concat(db.experiments.map((e) => ({ type: "experiment", ts: e.ts, data: e })));
-        }
-        if (filter === "all" || filter === "mindfulness") {
-          items = items.concat(db.mindfulness.map((m) => ({ type: "mindfulness", ts: m.ts, data: m })));
-        }
-        if (filter === "all" || filter === "assessment") {
-          items = items.concat(db.assessments.map((a) => ({ type: "assessment", ts: a.ts, data: a })));
-        }
-
-        items.sort((a, b) => b.ts - a.ts);
-
-        if (!items.length) {
-          box.innerHTML = `<div class="text-sm text-gray-500">暂无记录</div>`;
-          return;
-        }
-
-        box.innerHTML = items
-          .map((it) => {
-            if (it.type === "thought") {
-              const r = it.data;
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-pencil text-primary text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">自动思维记录</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 line-clamp-2 mb-3">情境：${r.context}… 情绪强度：${r.emotion}分</p>
-                <span class="badge bg-blue-50 text-primary">思维</span>
-              </div>`;
-            }
-            if (it.type === "emotion") {
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-heart-o text-secondary text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">情绪练习完成</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 mb-2">练习：${it.data.card}</p>
-                <span class="badge bg-green-50 text-secondary">练习</span>
-              </div>`;
-            }
-            if (it.type === "experiment") {
-              const e = it.data;
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-flask text-accent text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">行为实验</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 line-clamp-2 mb-2">${e.belief}</p>
-                <span class="badge bg-purple-50 text-purple-600">实验</span>
-              </div>`;
-            }
-            if (it.type === "mindfulness") {
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-headphones text-yellow-500 text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">冥想练习</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 mb-2">时长：${Math.round(it.data.seconds / 60)} 分钟</p>
-                <span class="badge bg-yellow-50 text-yellow-600">冥想</span>
-              </div>`;
-            }
-            if (it.type === "assessment") {
-              return `<div class="bg-white rounded-lg p-4 card-shadow">
-                <div class="flex justify-between items-start mb-2">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center mr-2">
-                      <i class="fa fa-question-circle text-pink-500 text-sm"></i>
-                    </div>
-                    <h4 class="font-medium">身心轻测评</h4>
-                  </div>
-                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
-                </div>
-                <p class="text-sm text-gray-600 mb-2">总分：${it.data.score}（9~45）</p>
-                <span class="badge bg-pink-50 text-pink-600">测评</span>
-              </div>`;
-            }
-          })
-          .join("");
-      }
-
-      // 导出所有 CSV
-      document.getElementById("btnExportAll").addEventListener("click", () => {
-        const db = loadDB();
-        const combine = [];
-        db.records.forEach((r) => combine.push(["思维记录", fmtTime(r.ts), r.context, r.thought.replace(/\n/g, " "), (r.evidence || "").replace(/\n/g, " "), r.emotion]));
-        db.emotions.forEach((e) => combine.push(["情绪练习", fmtTime(e.ts), e.card, "", "", ""]));
-        db.experiments.forEach((e) => combine.push(["行为实验", fmtTime(e.ts), e.belief.replace(/\n/g, " "), (e.predict || "").replace(/\n/g, " "), (e.actual || "").replace(/\n/g, " "), ""]));
-        db.mindfulness.forEach((m) => combine.push(["冥想", fmtTime(m.ts), `时长${Math.round(m.seconds / 60)}分钟`, "", "", ""]));
-        db.assessments.forEach((a) => combine.push(["测评", fmtTime(a.ts), `总分${a.score}`, "", "", ""]));
-        if (!combine.length) return showToast("暂无数据可导出");
-
-        const header = ["类型", "时间", "A", "B", "C", "D"];
-        const csv = [header, ...combine].map((r) => r.map((x) => `"${(x + "").replace(/"/g, '""')}"`).join(",")).join("\n");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = "mindfit_all_records.csv"; a.click();
-        URL.revokeObjectURL(url);
-      });
-
-      // 清空数据
-      document.getElementById("btnClearAll").addEventListener("click", () => {
-        if (!confirm("确定要清空所有本地数据吗？此操作不可恢复。")) return;
-        localStorage.removeItem(DB_KEY);
-        showToast("已清空本地数据");
-        renderHome();
-        renderRecordList("all");
-        renderBadges();
-      });
-
-      /*****************
-       * 徽章系统
-       *****************/
-      const BADGE_RULES = [
-        { id: "tr_3", name: "思维记录者", icon: "fa-pencil", color: "text-primary", desc: "完成 3 次自动思维记录", check: (db) => db.records.length >= 3 },
-        { id: "emo_5", name: "情绪调节新手", icon: "fa-heart-o", color: "text-secondary", desc: "完成 5 次情绪练习", check: (db) => db.emotions.length >= 5 },
-        { id: "streak_7", name: "坚持者", icon: "fa-calendar-check-o", color: "text-accent", desc: "连续 7 天使用", check: (db) => db.streak.count >= 7 },
-      ];
-
-      function unlockBadgesIfNeeded(db) {
-        let unlockedName = null;
-        BADGE_RULES.forEach((b) => {
-          if (b.check(db) && !db.badges[b.id]) {
-            db.badges[b.id] = true;
-            unlockedName = b.name;
-          }
-        });
-        saveDB(db);
-        if (unlockedName) {
-          const banner = document.getElementById("badgeBanner");
-          const text = document.getElementById("badgeBannerText");
-          text.textContent = unlockedName;
-          banner.classList.remove("hidden");
-          setTimeout(() => banner.classList.add("hidden"), 3200);
-        }
-      }
-
-      function renderBadges() {
-        const db = loadDB();
-        const unlocked = document.getElementById("badgeUnlocked");
-        const locked = document.getElementById("badgeLocked");
-        const renderCard = (b, dim = false) => `
-          <div class="badge-card bg-white rounded-xl p-4 card-shadow flex flex-col items-center ${dim ? 'opacity-50' : ''}">
-            <div class="w-16 h-16 rounded-full ${dim ? 'bg-gray-100' : 'bg-blue-100'} flex items-center justify-center mb-2">
-              <i class="fa ${b.icon} ${b.color} text-2xl"></i>
-            </div>
-            <h4 class="text-sm font-medium text-center mb-1">${b.name}</h4>
-            <p class="text-xs text-gray-500 text-center mb-2">${b.desc}</p>
-          </div>`;
-        unlocked.innerHTML = BADGE_RULES.filter((b) => db.badges[b.id]).map((b) => renderCard(b)).join("") || `<div class="text-sm text-gray-500">暂无</div>`;
-        locked.innerHTML = BADGE_RULES.filter((b) => !db.badges[b.id]).map((b) => renderCard(b, true)).join("") || `<div class="text-sm text-gray-500">全部解锁啦 🎉</div>`;
-      }
-
-      /*****************
-       * 首页渲染（进度/最近/推荐）
-       *****************/
-      function renderHome() {
-        const db = loadDB();
-        // 进度：粗略用各模块完成量合成
-        const total = db.records.length + db.emotions.length + db.mindfulness.length + db.experiments.length + db.assessments.length;
-        const percent = Math.max(5, Math.min(100, Math.round((total / 20) * 100))); // 20 次完成≈满进度
-        document.getElementById("progressBar").style.width = `${percent}%`;
-
-        // 最近记录：取最近 2 条（思维/练习/冥想/实验/测评混排）
-        const recentBox = document.getElementById("recentList");
-        const all = []
-          .concat(db.records.map((r) => ({ type: "thought", ts: r.ts, tag: "思维", icon: "fa-pencil", color: "text-primary" })))
-          .concat(db.emotions.map((e) => ({ type: "emotion", ts: e.ts, tag: "练习", icon: "fa-heart-o", color: "text-secondary" })))
-          .concat(db.mindfulness.map((m) => ({ type: "mindfulness", ts: m.ts, tag: "冥想", icon: "fa-headphones", color: "text-yellow-500" })))
-          .concat(db.experiments.map((m) => ({ type: "experiment", ts: m.ts, tag: "实验", icon: "fa-flask", color: "text-accent" })))
-          .concat(db.assessments.map((a) => ({ type: "assessment", ts: a.ts, tag: "测评", icon: "fa-question-circle", color: "text-pink-500" })));
-        all.sort((a, b) => b.ts - a.ts);
-        const slice = all.slice(0, 2);
-        if (!slice.length) {
-          recentBox.innerHTML = `<div class="text-sm text-gray-500">暂无记录，先去试试上方的工具卡片吧～</div>`;
-        } else {
-          recentBox.innerHTML = slice
-            .map(
-              (x) => `<div class="bg-white rounded-lg p-4 card-shadow flex items-center justify-between">
-                <div class="flex items-center">
-                  <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                    <i class="fa ${x.icon} ${x.color}"></i>
-                  </div>
-                  <div>
-                    <p class="font-medium">${x.tag}记录</p>
-                    <p class="text-sm text-gray-500">${fmtTime(x.ts)}</p>
-                  </div>
-                </div>
-                <span class="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded-full">${x.tag}</span>
-              </div>`
-            )
-            .join("");
-        }
-
-        // 推荐内容：根据最近一次情绪强度
-        const recBox = document.getElementById("recommendList");
-        const last = db.records.slice(-1)[0];
-        const items =
-          last && last.emotion >= 7
-            ? [
-                { img: 31, title: "焦虑时的 90 秒方法", desc: "识别情绪→深呼吸→放松扫描" },
-                { img: 32, title: "两分钟自我肯定语", desc: "写下 3 条身体功能感恩" },
-              ]
-            : [
-                { img: 33, title: "身体中立入门", desc: "从功能与健康角度看待身体" },
-                { img: 34, title: "正念饮食 5 步", desc: "慢一点，和味道好好相处" },
-              ];
-        recBox.innerHTML = items
-          .map(
-            (r) => `<div class="bg-white rounded-xl overflow-hidden card-shadow">
-              <img src="https://picsum.photos/400/200?random=${r.img}" alt="${r.title}" class="w-full h-40 object-cover">
-              <div class="p-4">
-                <h4 class="font-semibold mb-1">${r.title}</h4>
-                <p class="text-sm text-gray-500 mb-3 line-clamp-2">${r.desc}</p>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-gray-400">2 分钟阅读</span>
-                  <button class="text-primary text-sm">查看</button>
-                </div>
-              </div>
-            </div>`
-          )
-          .join("");
-      }
-
-      // 首次进入，渲染首页
-      renderHome();
-      renderTRPreview();
+    document.getElementById("startLight").addEventListener("click", ()=>goto("lightAssess"));
+    document.getElementById("resetLight").addEventListener("click", ()=>{
+      document.querySelectorAll('#lightQuestions input[type="radio"]').forEach(i=>i.checked=false);
+      document.getElementById("lightResult").classList.add("hidden");
     });
+
+    document.getElementById("submitLight").addEventListener("click", ()=>{
+      const vals = getLightValues();
+      if(!vals) return toast("还有题目未作答～");
+      const bodyFeel = document.getElementById("lightFeel").value||"";
+      const height = parseFloat(document.getElementById("lightHeight").value)||null;
+      const weight = parseFloat(document.getElementById("lightWeight").value)||null;
+
+      const total = vals.slice(0,8).reduce((a,b)=>a+b,0); // 8~40
+      const readiness = vals[8]; // 1~5
+      // 分级
+      let level="", advice=[];
+      if(total<=18){ level="低水平"; advice.push("每日 1 次 2 分钟呼吸 + 1 条自我肯定语","出现波动时使用 5-4-3-2-1 五感觉察"); }
+      else if(total<=29){ level="需要关注"; advice.push("每日打卡：4-2-6 呼吸×2 + 情绪命名×1","每周 2 次自动思维记录，必要时做 1 次小型行为实验"); }
+      else { level="优先干预"; advice.push("本周完成 3 次自动思维记录（聚焦外貌想法）","优先：4-2-6 呼吸 + 五感觉察","从正念饮食开始修复饮食紧绷感"); }
+      // 准备度差异化
+      if(readiness<=2) advice.unshift("从最小行动开始：60 秒呼吸 + 1 句自我肯定语");
+      else if(readiness===3) advice.unshift("加入每日打卡与情绪卡片练习");
+      else advice.unshift("今日即可开启：CBT 思维记录 + 行为实验（微步）");
+
+      // 主观感受加成
+      if(bodyFeel==="不自信") advice.push("写 3 条“身体功能感恩”并朗读");
+      if(bodyFeel==="紧绷") advice.push("今日小任务：肩颈拉伸 5 分钟 + 10 轮呼吸");
+      if(bodyFeel==="疲惫") advice.push("今晚早点休息；睡前 3 分钟冥想");
+
+      // 存档
+      const db=loadDB();
+      const payload = {vals, total, readiness, height, weight, bodyFeel};
+      const res = {level, advice};
+      db.assessments.push({type:"light", ts:Date.now(), payload, result:res});
+      touchStreak(db); saveDB(db); unlockBadgesIfNeeded(db);
+
+      // 渲染结果
+      document.getElementById("lightResult").classList.remove("hidden");
+      document.getElementById("lightSummary").innerHTML = `
+        <div>焦虑总分：<b>${total}</b>（8–40）｜分级：<span class="badge bg-blue-100 text-blue-700">${level}</span></div>
+        <div>准备度：<b>${readiness}</b>/5</div>
+      `;
+      document.getElementById("lightAdvice").innerHTML = res.advice.map(a=>`<li>${a}</li>`).join("");
+
+      renderHome(); renderRecordList("assessment");
+      toast("轻测评已保存");
+    });
+
+    // 导出轻测评 CSV
+    document.getElementById("exportLightCSV").addEventListener("click", ()=>{
+      const db = loadDB();
+      const last = [...db.assessments].reverse().find(a=>a.type==="light");
+      if(!last) return toast("暂无轻测评结果");
+      const header = ["时间","类型","总分","准备度","身高","体重","感受","建议"];
+      const row = [
+        fmt(last.ts),"light", last.payload.total, last.payload.readiness,
+        last.payload.height??"", last.payload.weight??"", last.payload.bodyFeel??"",
+        last.result.advice.join(" / ")
+      ];
+      const csv = [header,row].map(r=>r.map(x=>`"${(x+"").replace(/"/g,'""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download="mindfit_light_assess.csv"; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // 打印轻测评 PDF
+    document.getElementById("printLightPDF").addEventListener("click", ()=>{
+      const area = document.getElementById("lightResult").innerHTML;
+      const w = window.open("", "_blank");
+      w.document.write(`<html><head><title>轻测评报告</title></head><body>${area}</body></html>`); w.document.close(); w.print();
+    });
+
+    /************ 专业测评 ************/
+    // 30题（文本来自你提供的问卷）
+    const PRO_Q = [
+      "最近一周，您觉得自己的身体总体感觉如何？",
+      "您有多久没有好好休息、让身体放松？",
+      "您是否经常关注自己身体的舒适感或不适感？",
+      "您最近会主动为身体做些友好的事（如慢走、拉伸、晒太阳等）吗？",
+      "您觉得自己和身体的关系更像朋友还是“外貌评判者”？",
+      "过去一周，您觉得自己的活力/精力如何？",
+      "您会因为身体状态影响到心情吗？",
+      "最近一周，您是否经常感到焦虑或烦躁？",
+      "您是否容易因为琐事心情低落？",
+      "您最近会主动采取措施缓解情绪（如深呼吸、正念练习）吗？",
+      "您是否因外界评价/网络信息而感到自卑或压力大？",
+      "您觉得自己有情绪波动时，能觉察并接纳这些情绪吗？",
+      "您最近有没有明显的压力源（例如周遭环境变化等）？",
+      "面对压力时，您会主动寻求支持还是自己消化？",
+      "最近一周，您的睡眠质量如何？",
+      "您是否经常对自己的外貌/体型感到不满？",
+      "您会在脑海中反复回想别人对您的评价吗？",
+      "您是否会放大身体上的细节缺陷？",
+      "当不顺利时，您会归因于自己的身体或外貌吗？",
+      "您是否尝试用积极、宽容的视角看待自己？",
+      "您觉得自己容易自责还是会自我鼓励？",
+      "您是否能接受“身体本来就多样，没有统一标准”这个理念？",
+      "您在面对消极想法时，能否停下来思考并做出积极调整？",
+      "最近一周，您有规律运动或活动身体吗？",
+      "您会强迫自己节食/锻炼以追求外貌目标吗？",
+      "您觉得自己饮食习惯更关注健康还是体型？",
+      "您最近是否有规律作息、保证睡眠？",
+      "您是否会尝试新的自我关怀行为（如冥想、放松、记录感受等）？",
+      "遇到身心困扰时，您更倾向于自我调节还是寻求外界帮助？",
+      "您是否相信身体的价值远不止外貌，更多在于陪伴和功能？"
+    ];
+    // 选项（每题 1~5）
+    const OPTS = [
+      "1","2","3","4","5"
+    ];
+    // 题目归属（维度与是否反向），统一转为“风险分”（高=更需要关注）
+    // A 身体感受与自我关怀: 1(R),2(R),3(正向关注高可视为风险=不反),4(R),5(R),6(R),28(R)
+    // B 情绪状态与调节: 7,8,9,10(R),12(R),13,14(R),29(R)
+    // C 身体形象与认知: 11,16,17,18,19,20(R),21(R),22(R),23(R),30(R)
+    // D 行为与生活习惯: 15(R),24(R),25,26(R),27(R)
+    const MAP = {
+      A:[{i:1,r:true},{i:2,r:true},{i:3,r:false},{i:4,r:true},{i:5,r:true},{i:6,r:true},{i:28,r:true}],
+      B:[{i:7,r:false},{i:8,r:false},{i:9,r:false},{i:10,r:true},{i:12,r:true},{i:13,r:false},{i:14,r:true},{i:29,r:true}],
+      C:[{i:11,r:false},{i:16,r:false},{i:17,r:false},{i:18,r:false},{i:19,r:false},{i:20,r:true},{i:21,r:true},{i:22,r:true},{i:23,r:true},{i:30,r:true}],
+      D:[{i:15,r:true},{i:24,r:true},{i:25,r:false},{i:26,r:true},{i:27,r:true}],
+    };
+    function renderProQuestions(){
+      const box = document.getElementById("proQuestions");
+      if(box.dataset.rendered==="1") return;
+      box.innerHTML = PRO_Q.map((q,idx)=>`
+        <div class="bg-white rounded-xl p-4 card-shadow">
+          <div class="text-sm mb-2">${idx+1}. ${q}</div>
+          <div class="grid grid-cols-5 gap-2 text-center text-xs">
+            ${OPTS.map(v=>`
+              <label class="border rounded-lg py-2">
+                <input type="radio" name="pq${idx}" value="${v}" class="hidden">
+                <div>${v}</div>
+              </label>`).join("")}
+          </div>
+        </div>
+      `).join("");
+      box.dataset.rendered="1";
+    }
+    function getProValues(){
+      const vals=[];
+      for(let i=0;i<PRO_Q.length;i++){
+        const sel = document.querySelector(`input[name="pq${i}"]:checked`);
+        if(!sel) return null;
+        vals.push(Number(sel.value)); // 1~5
+      }
+      return vals;
+    }
+
+    document.getElementById("startPro").addEventListener("click", ()=>goto("proAssess"));
+    document.getElementById("resetPro").addEventListener("click", ()=>{
+      document.querySelectorAll('#proQuestions input[type="radio"]').forEach(i=>i.checked=false);
+      document.getElementById("proResult").classList.add("hidden");
+    });
+
+    function riskScore(val, reverse){ // 1~5 -> 风险分1~5；若反向，风险=6-值
+      return reverse? (6 - val) : val;
+    }
+    function standardize(sum, n){ // 0~100（越高越需要关注）
+      return Math.round(((sum - 1*n) / (4*n)) * 100);
+    }
+    function grade100(s){ // 分级文案
+      if(s<=33) return {label:"良好", tagClass:"bg-green-50 text-green-700"};
+      if(s<=66) return {label:"需要练习", tagClass:"bg-yellow-50 text-yellow-700"};
+      return {label:"优先关注", tagClass:"bg-red-50 text-red-700"};
+    }
+
+    let chartRef=null;
+    document.getElementById("submitPro").addEventListener("click", ()=>{
+      const vals = getProValues();
+      if(!vals) return toast("还有题目未作答～");
+      // 计算四维度风险分
+      const calcDim = (arr)=> arr.reduce((acc,{i,r})=> acc + riskScore(vals[i-1], r), 0);
+      const A = calcDim(MAP.A), B = calcDim(MAP.B), C = calcDim(MAP.C), D = calcDim(MAP.D);
+      const A100 = standardize(A, MAP.A.length), B100 = standardize(B, MAP.B.length), C100 = standardize(C, MAP.C.length), D100 = standardize(D, MAP.D.length);
+      const overall = Math.round((A100+B100+C100+D100)/4);
+
+      // 分级与建议
+      const GA=grade100(A100), GB=grade100(B100), GC=grade100(C100), GD=grade100(D100), GO=grade100(overall);
+      const plan = [];
+      // A 身体感受与自我关怀
+      if(A100>66) plan.push("连续 7 天“睡眠优先周”：固定就寝 + 3 分钟呼吸；本周 2 次身体扫描 5 分钟");
+      else if(A100>33) plan.push("每日 1 次 3 分钟冥想 + 晚间 30 分钟电子屏幕关闭；一周 2 次温和拉伸");
+      // B 情绪状态与调节
+      if(B100>66) plan.push("今日完成 1 次自动思维记录；本周 1 次小型行为实验；必要时考虑求助渠道");
+      else if(B100>33) plan.push("每日 4-2-6 呼吸×2 + 情绪命名×1；情绪波动时使用五感觉察");
+      // C 身体形象与认知
+      if(C100>66) plan.push("设计 1 个行为实验（如与信任的人共餐）；每周 3 次思维记录；减少镜前检查/社媒比较时长");
+      else if(C100>33) plan.push("本周 2 次思维记录（聚焦外貌想法）；阅读“身体中立 3 步”，写 3 条身体功能感恩");
+      // D 行为与生活习惯
+      if(D100>66) plan.push("停止“体重惩罚式”节食；采用盘子法与规律三餐；设置 7 天步行 5000 步挑战");
+      else if(D100>33) plan.push("每周 3 次 15 分钟轻运动；规律作息；饮食以“非限制、均衡”为原则");
+
+      // 存档
+      const db = loadDB();
+      const payload = {vals};
+      const result = {A100,B100,C100,D100,overall,plan};
+      db.assessments.push({type:"pro", ts:Date.now(), payload, result});
+      touchStreak(db); saveDB(db); unlockBadgesIfNeeded(db);
+      renderHome(); renderRecordList("assessment");
+      toast("专业测评已保存");
+
+      // 渲染结果
+      const box = document.getElementById("proResult");
+      box.classList.remove("hidden");
+      document.getElementById("proOverall").innerHTML = `
+        <div class="text-sm">总评：<span class="badge ${GO.tagClass}">${GO.label}</span>（综合 ${overall}/100）</div>
+        <div class="mt-2 text-xs text-gray-600">A 身体自我关怀：<b>${A100}</b>｜B 情绪调节：<b>${B100}</b>｜C 身体形象认知：<b>${C100}</b>｜D 行为习惯：<b>${D100}</b></div>
+      `;
+      document.getElementById("proBadges").innerHTML = `
+        <div class="text-sm">A：<span class="badge ${GA.tagClass}">${GA.label}</span></div>
+        <div class="text-sm">B：<span class="badge ${GB.tagClass}">${GB.label}</span></div>
+        <div class="text-sm">C：<span class="badge ${GC.tagClass}">${GC.label}</span></div>
+        <div class="text-sm">D：<span class="badge ${GD.tagClass}">${GD.label}</span></div>
+      `;
+      document.getElementById("proPlan").innerHTML = plan.map(p=>`<li>${p}</li>`).join("");
+
+      // 图表
+      const ctx = document.getElementById("proChart");
+      if(chartRef) chartRef.destroy();
+      chartRef = new Chart(ctx, {
+        type:"radar",
+        data:{
+          labels:["A 身体关怀","B 情绪","C 身体形象","D 行为习惯"],
+          datasets:[{
+            label:"风险（0-100，越高越需关注）",
+            data:[A100,B100,C100,D100]
+          }]
+        },
+        options:{
+          responsive:true,
+          scales:{ r:{ beginAtZero:true, max:100 } },
+          plugins:{ legend:{ display:false } }
+        }
+      });
+    });
+
+    // 导出专业测评 CSV
+    document.getElementById("exportProCSV").addEventListener("click", ()=>{
+      const db = loadDB();
+      const last = [...db.assessments].reverse().find(a=>a.type==="pro");
+      if(!last) return toast("暂无专业测评结果");
+      const header = ["时间","类型","A(0-100)","B(0-100)","C(0-100)","D(0-100)","综合","计划"];
+      const row = [fmt(last.ts),"pro", last.result.A100,last.result.B100,last.result.C100,last.result.D100,last.result.overall, last.result.plan.join(" / ")];
+      const csv = [header,row].map(r=>r.map(x=>`"${(x+"").replace(/"/g,'""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download="mindfit_pro_assess.csv"; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // 打印专业测评 PDF
+    document.getElementById("printProPDF").addEventListener("click", ()=>{
+      const area = document.getElementById("proResult").innerHTML;
+      const w = window.open("", "_blank");
+      w.document.write(`<html><head><title>专业测评报告</title></head><body>${area}</body></html>`); w.document.close(); w.print();
+    });
+
+    /************ 思维记录 ************/
+    function renderTRPreview(){
+      const db=loadDB(); const box=document.getElementById("trPreview");
+      const r = db.records.slice(-1)[0];
+      if(!r) { box.textContent="暂无"; return; }
+      box.innerHTML = `
+        <div class="text-xs text-gray-500">${fmt(r.ts)}</div>
+        <div>情境：${r.context}</div>
+        <div>想法：${r.thought||"-"}</div>
+        <div>证据：${r.evidence||"-"}</div>
+        <div>情绪强度：${r.emotion}</div>
+      `;
+    }
+    document.getElementById("saveTR").addEventListener("click", ()=>{
+      const ctxSel=document.getElementById("trContext").value;
+      const ctxCus=document.getElementById("trContextCustom").value.trim();
+      const thought=document.getElementById("trThought").value.trim();
+      const evidence=document.getElementById("trEvidence").value.trim();
+      const emotion=Number(document.getElementById("trEmotion").value)||5;
+      const ctx = ctxSel==="其他" ? (ctxCus||"未填写") : (ctxSel||ctxCus||"未填写");
+      if(!thought) return toast("请填写当时的想法");
+      const db=loadDB();
+      db.records.push({ts:Date.now(), context:ctx, thought, evidence, emotion});
+      touchStreak(db); saveDB(db); unlockBadgesIfNeeded(db);
+      renderTRPreview(); renderHome(); renderRecordList("thought");
+      toast("已保存");
+    });
+
+    /************ 情绪卡片 ************/
+    function weekCount(items){
+      const now=new Date(); const start=new Date(now); start.setDate(now.getDate()-now.getDay());
+      return items.filter(x=> new Date(x.ts)>=start ).length;
+    }
+    function renderEmotionStats(){
+      const db=loadDB();
+      document.getElementById("emoWeek").textContent = `${Math.min(7, weekCount(db.emotions))}/7`;
+      document.getElementById("emoTotal").textContent = db.emotions.length;
+      document.getElementById("emoStreak").textContent = db.streak.count;
+      document.getElementById("emoBar").style.width = `${Math.min(100, weekCount(db.emotions)/7*100)}%`;
+    }
+    document.querySelectorAll(".finishCard").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const card=btn.dataset.card;
+        const db=loadDB(); db.emotions.push({card,ts:Date.now()}); touchStreak(db); saveDB(db); unlockBadgesIfNeeded(db);
+        renderEmotionStats(); renderHome(); renderRecordList("emotion"); toast("已标记完成");
+      });
+    });
+
+    /************ 行为实验 ************/
+    function renderBXList(){
+      const db=loadDB(); const list=document.getElementById("bxList");
+      if(!db.experiments.length){ list.innerHTML='<div class="text-sm text-gray-500">暂无</div>'; return; }
+      list.innerHTML = db.experiments.slice(-3).reverse().map(e=>`
+        <div class="bg-white p-3 rounded-lg card-shadow">
+          <div class="flex items-center justify-between">
+            <div class="font-medium">实验：${e.belief.slice(0,18)}${e.belief.length>18?'…':''}</div>
+            <div class="text-xs text-gray-500">${fmt(e.ts)}</div>
+          </div>
+          <div class="text-xs text-gray-600 mt-1">${e.predict?("预测："+e.predict):""}</div>
+        </div>
+      `).join("");
+    }
+    document.getElementById("saveBX").addEventListener("click", ()=>{
+      const item = {
+        ts:Date.now(),
+        belief:document.getElementById("bxBelief").value.trim(),
+        steps:[document.getElementById("bxStep1").value.trim(),document.getElementById("bxStep2").value.trim(),document.getElementById("bxStep3").value.trim()].filter(Boolean),
+        predict:document.getElementById("bxPredict").value.trim(),
+        actual:document.getElementById("bxActual").value.trim(),
+        learn:document.getElementById("bxLearn").value.trim(),
+      };
+      if(!item.belief) return toast("请填写担忧信念");
+      const db=loadDB(); db.experiments.push(item); touchStreak(db); saveDB(db); unlockBadgesIfNeeded(db);
+      renderBXList(); renderHome(); renderRecordList("experiment"); toast("已保存");
+    });
+
+    /************ 冥想 ************/
+    const audio=document.getElementById("audio"), seek=document.getElementById("seek"), playBtn=document.getElementById("playPause"), cur=document.getElementById("curTime"), total=document.getElementById("totalTime");
+    function timeStr(s){ const m=String(Math.floor(s/60)).padStart(2,"0"), ss=String(Math.floor(s%60)).padStart(2,"0"); return `${m}:${ss}`; }
+    playBtn.addEventListener("click", ()=>{
+      if(audio.paused){ audio.play().catch(()=>{}); playBtn.innerHTML='<i class="fa fa-pause"></i>'; }
+      else { audio.pause(); playBtn.innerHTML='<i class="fa fa-play"></i>'; }
+    });
+    audio.addEventListener("timeupdate", ()=>{ seek.value=Math.floor(audio.currentTime); cur.textContent=timeStr(audio.currentTime); });
+    seek.addEventListener("input", ()=> audio.currentTime=Number(seek.value));
+    document.getElementById("startTimer").addEventListener("click", ()=>{
+      let s=0; const id=setInterval(()=>{ s++; seek.value=s; cur.textContent=timeStr(s); if(s>=180){ clearInterval(id);
+        const db=loadDB(); db.mindfulness.push({seconds:s, ts:Date.now()}); touchStreak(db); saveDB(db); unlockBadgesIfNeeded(db); renderHome(); renderRecordList("mindfulness"); toast("练习完成 3 分钟"); }
+      },1000);
+    });
+
+    /************ 记录列表 & 导出 ************/
+    function renderRecordList(filter){
+      const db=loadDB(); const box=document.getElementById("recordList");
+      let items=[];
+      const push=(arr,type,extra)=> arr.forEach(x=>items.push({type, ts:x.ts, data:x, extra}));
+      if(filter==="all"||filter==="assessment") push(db.assessments,"assessment");
+      if(filter==="all"||filter==="thought") push(db.records,"thought");
+      if(filter==="all"||filter==="emotion") push(db.emotions,"emotion");
+      if(filter==="all"||filter==="mindfulness") push(db.mindfulness,"mindfulness");
+      if(filter==="all"||filter==="experiment") push(db.experiments,"experiment");
+      items.sort((a,b)=>b.ts-a.ts);
+      box.innerHTML = items.length? items.map(it=>{
+        const tag = it.type==="assessment"?"测评": it.type==="thought"?"思维": it.type==="emotion"?"练习": it.type==="mindfulness"?"冥想":"实验";
+        return `<div class="bg-white rounded-lg p-3 card-shadow">
+          <div class="flex items-center justify-between">
+            <div class="font-medium">${tag}</div>
+            <div class="text-xs text-gray-500">${fmt(it.ts)}</div>
+          </div>
+        </div>`;
+      }).join("") : `<div class="text-sm text-gray-500">暂无</div>`;
+    }
+    document.querySelectorAll(".filter").forEach(b=>b.addEventListener("click",()=>{
+      document.querySelectorAll(".filter").forEach(x=> x.className = x.className.replace("bg-blue-500 text-white","bg-gray-100 text-gray-600"));
+      b.className = b.className.replace("bg-gray-100 text-gray-600","bg-blue-500 text-white");
+      renderRecordList(b.dataset.type);
+    }));
+    document.getElementById("exportAllCSV").addEventListener("click", ()=>{
+      const db=loadDB(); const rows=[["类型","时间","内容A","内容B","内容C","内容D"]];
+      db.assessments.forEach(a=>{
+        if(a.type==="light") rows.push(["轻测评", fmt(a.ts), `总分${a.payload.total}`, `准备度${a.payload.readiness}`, a.payload.bodyFeel||"", a.result.advice.slice(0,2).join("/") ]);
+        else rows.push(["专业测评", fmt(a.ts), `A${a.result.A100}`, `B${a.result.B100}`, `C${a.result.C100}`, `D${a.result.D100}`]);
+      });
+      db.records.forEach(r=> rows.push(["思维记录", fmt(r.ts), r.context, r.thought, r.evidence||"", r.emotion]));
+      db.emotions.forEach(e=> rows.push(["情绪练习", fmt(e.ts), e.card,"","",""]));
+      db.mindfulness.forEach(m=> rows.push(["冥想", fmt(m.ts), `时长${Math.round(m.seconds/60)}分钟`,"","",""]));
+      db.experiments.forEach(e=> rows.push(["行为实验", fmt(e.ts), e.belief, e.predict||"", e.actual||"", e.learn||""]));
+      if(rows.length===1) return toast("暂无数据可导出");
+      const csv = rows.map(r=>r.map(x=>`"${(x+"").replace(/"/g,'""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download="mindfit_all.csv"; a.click(); URL.revokeObjectURL(url);
+    });
+    document.getElementById("clearAll").addEventListener("click", ()=>{
+      if(!confirm("确定清空所有本地数据？")) return;
+      localStorage.removeItem(DB_KEY); toast("已清空");
+      renderHome(); renderRecordList("all"); renderBadges();
+    });
+
+    /************ 徽章 ************/
+    const BADGES = [
+      {id:"tr_3", name:"思维记录者", icon:"fa-pencil", color:"text-blue-500", desc:"完成 3 次自动思维记录", check:(db)=>db.records.length>=3},
+      {id:"emo_5", name:"情绪调节新手", icon:"fa-heart-o", color:"text-green-500", desc:"完成 5 次情绪练习", check:(db)=>db.emotions.length>=5},
+      {id:"streak_7", name:"坚持者", icon:"fa-calendar-check-o", color:"text-purple-500", desc:"连续 7 天使用", check:(db)=>db.streak.count>=7},
+      {id:"assess_3", name:"自我觉察", icon:"fa-question-circle", color:"text-pink-500", desc:"完成 3 次任意测评", check:(db)=>db.assessments.length>=3}
+    ];
+    function unlockBadgesIfNeeded(db){ let changed=false; BADGES.forEach(b=>{ if(b.check(db) && !db.badges[b.id]){ db.badges[b.id]=true; changed=true; }}); if(changed) saveDB(db); }
+    function renderBadges(){
+      const db=loadDB();
+      const unlocked = BADGES.filter(b=>db.badges[b.id]);
+      const locked = BADGES.filter(b=>!db.badges[b.id]);
+      document.getElementById("badgeUnlocked").innerHTML = unlocked.length? unlocked.map(b=>`
+        <div class="bg-white p-4 rounded-xl card-shadow text-center">
+          <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><i class="fa ${b.icon} ${b.color} text-xl"></i></div>
+          <div class="text-sm font-medium">${b.name}</div>
+          <div class="text-xs text-gray-500">${b.desc}</div>
+        </div>`).join("") : `<div class="text-sm text-gray-500 col-span-3">暂无</div>`;
+      document.getElementById("badgeLocked").innerHTML = locked.length? locked.map(b=>`
+        <div class="bg-white p-4 rounded-xl card-shadow text-center opacity-60">
+          <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><i class="fa ${b.icon} ${b.color} text-xl"></i></div>
+          <div class="text-sm font-medium">${b.name}</div>
+          <div class="text-xs text-gray-500">${b.desc}</div>
+        </div>`).join("") : `<div class="text-sm text-gray-500 col-span-3">全部解锁 🎉</div>`;
+    }
+
+    // 首页初始化
+    renderHome(); renderTRPreview();
   </script>
 </body>
 </html>

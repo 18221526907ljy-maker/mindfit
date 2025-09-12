@@ -1,0 +1,28 @@
+/* 卡片美化 */
+.card-shadow {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-shadow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+/* 背景渐变 */
+body {
+  background: linear-gradient(to bottom right, #f0fdfa, #e0f2fe);
+}
+
+/* 标题颜色 */
+h1, h2, h3 {
+  color: #0d9488; /* 蓝绿色 */
+}
+
+/* 按钮优化 */
+button {
+  transition: all 0.2s ease;
+}
+button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}

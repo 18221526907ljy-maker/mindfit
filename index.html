@@ -2,10 +2,10 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
   <title>MindFit - 身心焦虑自助工具</title>
 
-  <!-- Tailwind：先配置，再加载 -->
+  <!-- 1) 先配置 Tailwind，再加载 CDN -->
   <script>
     window.tailwind = window.tailwind || {};
     tailwind.config = {
@@ -22,31 +22,69 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- 图标与你自己的样式 -->
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css">
+  <!-- 2) 图标 & 你的自定义样式（如有） -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
 
-  <!-- Tailwind 内联 utilities -->
+  <!-- 3) Tailwind 内联 utilities（不要再嵌套 <style> 里放 <style>） -->
   <style type="text/tailwindcss">
     @layer utilities {
-      .content-auto { content-visibility: auto; }
-      .card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-      .transition-smooth { transition: all 0.3s ease; }
-      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .content-auto { content-visibility:auto; }
+      .card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+      .transition-smooth { transition: all .3s ease; }
+      .scrollbar-hide::-webkit-scrollbar { display:none; }
       .text-balance { text-wrap: balance; }
       .btn-primary { @apply w-full py-3 bg-primary text-white rounded-lg font-medium flex items-center justify-center; }
       .badge { @apply text-xs px-2 py-1 rounded-full; }
     }
   </style>
 
-  <!-- 兜底 CSS：Tailwind 加载失败时也能隐藏非当前页 -->
+  <!-- 4) 兜底 CSS：即使 Tailwind 拉不动，也能隐藏非当前页、卡片有基础阴影 -->
   <style>
     .hidden { display: none !important; }
-    .card-shadow:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.12); transition: .2s; transform: translateY(-2px); }
+    .card-shadow:hover { box-shadow: 0 8px 20px rgba(0,0,0,.12); transition:.2s; transform: translateY(-2px); }
   </style>
 </head>
 
+
 <!-- 页面内容 -->
+<script>
+(function(){
+  // 找到所有单页
+  const pages = Array.from(document.querySelectorAll('.page'));
+
+  // 通用显示函数：优先用你自己的切页函数
+  function show(id) {
+    if (typeof window.navigateTo === 'function') {
+      try { window.navigateTo(id); } catch(e) { console.error(e); fallback(id); }
+    } else if (typeof window.showPage === 'function') {
+      try { window.showPage(id); } catch(e) { console.error(e); fallback(id); }
+    } else {
+      fallback(id);
+    }
+    // 顶部/入口高亮（如果你用 data-goto）
+    document.querySelectorAll('[data-goto]').forEach(btn=>{
+      btn.classList.toggle('active', btn.getAttribute('data-goto') === id);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function fallback(id){
+    pages.forEach(p => p.classList.add('hidden'));
+    document.getElementById(id)?.classList.remove('hidden');
+    const titleEl = document.getElementById('pageTitle');
+    if (titleEl) titleEl.textContent = titleMap?.[id] || titleEl.textContent;
+  }
+
+  // 点击绑定（功能卡片/底部导航/顶部导航等）
+  document.querySelectorAll('[data-goto]').forEach(btn=>{
+    btn.addEventListener('click', ()=> show(btn.getAttribute('data-goto')));
+  });
+
+  // 初始：以当前未隐藏的 page 为准；都隐藏的话默认 homePage
+  const firstShown = pages.find(p => !p.classList.contains('hidden'))?.id || 'homePage';
+  show(firstShown);
+})();
+</script>
 
 
 

@@ -1,118 +1,55 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>MindFit - 身心焦虑自助工具</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
-    rel="stylesheet"
-  />
-  <link rel="stylesheet" href="style.css">
 
+  <!-- Tailwind：先配置，再加载 -->
   <script>
+    window.tailwind = window.tailwind || {};
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            primary: "#3B82F6",
-            secondary: "#10B981",
-            accent: "#8B5CF6",
-            neutral: "#F3F4F6",
-            dark: "#1F2937",
-            light: "#F9FAFB",
+            primary:"#3B82F6", secondary:"#10B981", accent:"#8B5CF6",
+            neutral:"#F3F4F6", dark:"#1F2937", light:"#F9FAFB",
           },
-          fontFamily: {
-            sans: ["PingFang SC", "Helvetica Neue", "Arial", "sans-serif"],
-          },
-        },
-      },
+          fontFamily: { sans: ["PingFang SC","Helvetica Neue","Arial","sans-serif"] }
+        }
+      }
     };
   </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 图标与你自己的样式 -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Tailwind 内联 utilities -->
   <style type="text/tailwindcss">
     @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .card-shadow {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      }
-      .transition-smooth {
-        transition: all 0.3s ease;
-      }
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-      .text-balance {
-        text-wrap: balance;
-      }
-      .btn-primary {
-        @apply w-full py-3 bg-primary text-white rounded-lg font-medium flex items-center justify-center;
-      }
-      .badge {
-        @apply text-xs px-2 py-1 rounded-full;
-      }
+      .content-auto { content-visibility: auto; }
+      .card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+      .transition-smooth { transition: all 0.3s ease; }
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .text-balance { text-wrap: balance; }
+      .btn-primary { @apply w-full py-3 bg-primary text-white rounded-lg font-medium flex items-center justify-center; }
+      .badge { @apply text-xs px-2 py-1 rounded-full; }
     }
-    <style>
-  /* 兜底：即使 Tailwind 没加载，也能把非当前页隐藏 */
-  .hidden { display: none !important; }
-  /* 兜底：简单按钮/卡片美化，避免过于简陋（可保留，也可以后删除） */
-  .card-shadow { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
-  .card-shadow:hover { box-shadow: 0 8px 20px rgba(0,0,0,.12); transition: .2s; transform: translateY(-2px); }
+  </style>
 
+  <!-- 兜底 CSS：Tailwind 加载失败时也能隐藏非当前页 -->
+  <style>
+    .hidden { display: none !important; }
+    .card-shadow:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.12); transition: .2s; transform: translateY(-2px); }
   </style>
 </head>
-<!-- 页面内容 -->
-
-<script>
-  // 等待文档加载完成再执行代码
-  document.addEventListener("DOMContentLoaded", () => {
-    // 页面切换逻辑
-    function navigateTo(id) {
-      console.log("Navigating to:", id);
-      pages.forEach((p) => p.classList.add("hidden"));
-      const target = document.getElementById(id);
-      if (!target) return;
-      target.classList.remove("hidden");
-      pageTitle.textContent = titleMap[id] || "MindFit";
-
-      if (pageHistory[pageHistory.length - 1] !== id) {
-        pageHistory.push(id);
-      }
-
-      window.scrollTo(0, 0);
-    }
-
-    // 返回按钮事件绑定
-    document.getElementById("backBtn").addEventListener("click", () => {
-      if (pageHistory.length > 1) {
-        pageHistory.pop();
-        navigateTo(pageHistory[pageHistory.length - 1]);
-      }
-    });
-  });
-</script>
 
 <!-- 页面内容 -->
-<!-- 顶部导航（新增） -->
-<header class="site-header">
-  <div class="site-header-inner">
-    <div class="brand">MindFit</div>
-    <nav class="top-nav">
-      <button class="nav-link" data-goto="homePage">首页</button>
-      <button class="nav-link" data-goto="assessHubPage">测评</button>
-      <button class="nav-link" data-goto="toolsPage">自助工具</button>
-      <button class="nav-link" data-goto="myRecordsPage">我的记录</button>
-    </nav>
-  </div>
-</header>
-<div class="header-spacer"></div>
+
+
+
 
 <body class="bg-gray-50 font-sans text-dark min-h-screen">
   <!-- 顶部导航栏 -->

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
   <meta charset="UTF-8" />
   <meta
     name="viewport"
@@ -57,6 +59,13 @@
         @apply text-xs px-2 py-1 rounded-full;
       }
     }
+    <style>
+  /* 兜底：即使 Tailwind 没加载，也能把非当前页隐藏 */
+  .hidden { display: none !important; }
+  /* 兜底：简单按钮/卡片美化，避免过于简陋（可保留，也可以后删除） */
+  .card-shadow { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+  .card-shadow:hover { box-shadow: 0 8px 20px rgba(0,0,0,.12); transition: .2s; transform: translateY(-2px); }
+
   </style>
 </head>
 <!-- 页面内容 -->
@@ -1538,6 +1547,33 @@
   document.querySelectorAll('.top-nav .nav-link').forEach(b=>{
     if (b.dataset.goto === current) b.classList.add('active');
   });
+})();
+</script>
+<script>
+(function() {
+  // 兜底：找到所有页面 section（你已有的每个页面都应该带 class="page"）
+  const pages = Array.from(document.querySelectorAll('.page'));
+
+  // 通用显示函数
+  function show(id) {
+    pages.forEach(p => p.classList.add('hidden'));
+    const t = document.getElementById(id);
+    if (t) t.classList.remove('hidden');
+    // 顶部按钮高亮（若你有 data-goto 的按钮）
+    document.querySelectorAll('[data-goto]').forEach(btn=>{
+      btn.classList.toggle('active', btn.getAttribute('data-goto') === id);
+    });
+    window.scrollTo(0,0);
+  }
+
+  // 绑定所有 data-goto 的入口（顶部导航、功能卡片都能用）
+  document.querySelectorAll('[data-goto]').forEach(btn=>{
+    btn.addEventListener('click', ()=> show(btn.getAttribute('data-goto')));
+  });
+
+  // 初始：如果当前已经有某个 .page 没有 hidden，就以它为首页；否则默认 homePage
+  const current = pages.find(p => !p.classList.contains('hidden'))?.id || 'homePage';
+  show(current);
 })();
 </script>
 

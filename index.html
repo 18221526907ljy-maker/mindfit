@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-
   <meta charset="UTF-8" />
   <meta
     name="viewport"
@@ -59,13 +57,6 @@
         @apply text-xs px-2 py-1 rounded-full;
       }
     }
-    <style>
-  /* 兜底：即使 Tailwind 没加载，也能把非当前页隐藏 */
-  .hidden { display: none !important; }
-  /* 兜底：简单按钮/卡片美化，避免过于简陋（可保留，也可以后删除） */
-  .card-shadow { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
-  .card-shadow:hover { box-shadow: 0 8px 20px rgba(0,0,0,.12); transition: .2s; transform: translateY(-2px); }
-
   </style>
 </head>
 <!-- 页面内容 -->
@@ -1309,6 +1300,251 @@
                 <span class="badge bg-green-50 text-secondary">练习</span>
               </div>`;
             }
+            if (it.type === "experiment") {
+              const e = it.data;
+              return `<div class="bg-white rounded-lg p-4 card-shadow">
+                <div class="flex justify-between items-start mb-2">
+                  <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-2">
+                      <i class="fa fa-flask text-accent text-sm"></i>
+                    </div>
+                    <h4 class="font-medium">行为实验</h4>
+                  </div>
+                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
+                </div>
+                <p class="text-sm text-gray-600 line-clamp-2 mb-2">${e.belief}</p>
+                <span class="badge bg-purple-50 text-purple-600">实验</span>
+              </div>`;
+            }
+            if (it.type === "mindfulness") {
+              return `<div class="bg-white rounded-lg p-4 card-shadow">
+                <div class="flex justify-between items-start mb-2">
+                  <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
+                      <i class="fa fa-headphones text-yellow-500 text-sm"></i>
+                    </div>
+                    <h4 class="font-medium">冥想练习</h4>
+                  </div>
+                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
+                </div>
+                <p class="text-sm text-gray-600 mb-2">时长：${Math.round(it.data.seconds / 60)} 分钟</p>
+                <span class="badge bg-yellow-50 text-yellow-600">冥想</span>
+              </div>`;
+            }
+            if (it.type === "assessment") {
+              return `<div class="bg-white rounded-lg p-4 card-shadow">
+                <div class="flex justify-between items-start mb-2">
+                  <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center mr-2">
+                      <i class="fa fa-question-circle text-pink-500 text-sm"></i>
+                    </div>
+                    <h4 class="font-medium">身心轻测评</h4>
+                  </div>
+                  <span class="text-xs text-gray-500">${fmtTime(it.ts)}</span>
+                </div>
+                <p class="text-sm text-gray-600 mb-2">总分：${it.data.score}（9~45）</p>
+                <span class="badge bg-pink-50 text-pink-600">测评</span>
+              </div>`;
+            }
+          })
+          .join("");
+      }
+
+      // 导出所有 CSV
+      document.getElementById("btnExportAll").addEventListener("click", () => {
+        const db = loadDB();
+        const combine = [];
+        db.records.forEach((r) => combine.push(["思维记录", fmtTime(r.ts), r.context, r.thought.replace(/\n/g, " "), (r.evidence || "").replace(/\n/g, " "), r.emotion]));
+        db.emotions.forEach((e) => combine.push(["情绪练习", fmtTime(e.ts), e.card, "", "", ""]));
+        db.experiments.forEach((e) => combine.push(["行为实验", fmtTime(e.ts), e.belief.replace(/\n/g, " "), (e.predict || "").replace(/\n/g, " "), (e.actual || "").replace(/\n/g, " "), ""]));
+        db.mindfulness.forEach((m) => combine.push(["冥想", fmtTime(m.ts), `时长${Math.round(m.seconds / 60)}分钟`, "", "", ""]));
+        db.assessments.forEach((a) => combine.push(["测评", fmtTime(a.ts), `总分${a.score}`, "", "", ""]));
+        if (!combine.length) return showToast("暂无数据可导出");
+
+        const header = ["类型", "时间", "A", "B", "C", "D"];
+        const csv = [header, ...combine].map((r) => r.map((x) => `"${(x + "").replace(/"/g, '""')}"`).join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "mindfit_all_records.csv"; a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // 清空数据
+      document.getElementById("btnClearAll").addEventListener("click", () => {
+        if (!confirm("确定要清空所有本地数据吗？此操作不可恢复。")) return;
+        localStorage.removeItem(DB_KEY);
+        showToast("已清空本地数据");
+        renderHome();
+        renderRecordList("all");
+        renderBadges();
+      });
+
+      /*****************
+       * 徽章系统
+       *****************/
+      const BADGE_RULES = [
+        { id: "tr_3", name: "思维记录者", icon: "fa-pencil", color: "text-primary", desc: "完成 3 次自动思维记录", check: (db) => db.records.length >= 3 },
+        { id: "emo_5", name: "情绪调节新手", icon: "fa-heart-o", color: "text-secondary", desc: "完成 5 次情绪练习", check: (db) => db.emotions.length >= 5 },
+        { id: "streak_7", name: "坚持者", icon: "fa-calendar-check-o", color: "text-accent", desc: "连续 7 天使用", check: (db) => db.streak.count >= 7 },
+      ];
+
+      function unlockBadgesIfNeeded(db) {
+        let unlockedName = null;
+        BADGE_RULES.forEach((b) => {
+          if (b.check(db) && !db.badges[b.id]) {
+            db.badges[b.id] = true;
+            unlockedName = b.name;
+          }
+        });
+        saveDB(db);
+        if (unlockedName) {
+          const banner = document.getElementById("badgeBanner");
+          const text = document.getElementById("badgeBannerText");
+          text.textContent = unlockedName;
+          banner.classList.remove("hidden");
+          setTimeout(() => banner.classList.add("hidden"), 3200);
+        }
+      }
+
+      function renderBadges() {
+        const db = loadDB();
+        const unlocked = document.getElementById("badgeUnlocked");
+        const locked = document.getElementById("badgeLocked");
+        const renderCard = (b, dim = false) => `
+          <div class="badge-card bg-white rounded-xl p-4 card-shadow flex flex-col items-center ${dim ? 'opacity-50' : ''}">
+            <div class="w-16 h-16 rounded-full ${dim ? 'bg-gray-100' : 'bg-blue-100'} flex items-center justify-center mb-2">
+              <i class="fa ${b.icon} ${b.color} text-2xl"></i>
+            </div>
+            <h4 class="text-sm font-medium text-center mb-1">${b.name}</h4>
+            <p class="text-xs text-gray-500 text-center mb-2">${b.desc}</p>
+          </div>`;
+        unlocked.innerHTML = BADGE_RULES.filter((b) => db.badges[b.id]).map((b) => renderCard(b)).join("") || `<div class="text-sm text-gray-500">暂无</div>`;
+        locked.innerHTML = BADGE_RULES.filter((b) => !db.badges[b.id]).map((b) => renderCard(b, true)).join("") || `<div class="text-sm text-gray-500">全部解锁啦 🎉</div>`;
+      }
+
+      /*****************
+       * 首页渲染（进度/最近/推荐）
+       *****************/
+      function renderHome() {
+        const db = loadDB();
+        // 进度：粗略用各模块完成量合成
+        const total = db.records.length + db.emotions.length + db.mindfulness.length + db.experiments.length + db.assessments.length;
+        const percent = Math.max(5, Math.min(100, Math.round((total / 20) * 100))); // 20 次完成≈满进度
+        document.getElementById("progressBar").style.width = `${percent}%`;
+
+        // 最近记录：取最近 2 条（思维/练习/冥想/实验/测评混排）
+        const recentBox = document.getElementById("recentList");
+        const all = []
+          .concat(db.records.map((r) => ({ type: "thought", ts: r.ts, tag: "思维", icon: "fa-pencil", color: "text-primary" })))
+          .concat(db.emotions.map((e) => ({ type: "emotion", ts: e.ts, tag: "练习", icon: "fa-heart-o", color: "text-secondary" })))
+          .concat(db.mindfulness.map((m) => ({ type: "mindfulness", ts: m.ts, tag: "冥想", icon: "fa-headphones", color: "text-yellow-500" })))
+          .concat(db.experiments.map((m) => ({ type: "experiment", ts: m.ts, tag: "实验", icon: "fa-flask", color: "text-accent" })))
+          .concat(db.assessments.map((a) => ({ type: "assessment", ts: a.ts, tag: "测评", icon: "fa-question-circle", color: "text-pink-500" })));
+        all.sort((a, b) => b.ts - a.ts);
+        const slice = all.slice(0, 2);
+        if (!slice.length) {
+          recentBox.innerHTML = `<div class="text-sm text-gray-500">暂无记录，先去试试上方的工具卡片吧～</div>`;
+        } else {
+          recentBox.innerHTML = slice
+            .map(
+              (x) => `<div class="bg-white rounded-lg p-4 card-shadow flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                    <i class="fa ${x.icon} ${x.color}"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium">${x.tag}记录</p>
+                    <p class="text-sm text-gray-500">${fmtTime(x.ts)}</p>
+                  </div>
+                </div>
+                <span class="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded-full">${x.tag}</span>
+              </div>`
+            )
+            .join("");
+        }
+
+        // 推荐内容：根据最近一次情绪强度
+        const recBox = document.getElementById("recommendList");
+        const last = db.records.slice(-1)[0];
+        const items =
+          last && last.emotion >= 7
+            ? [
+                { img: 31, title: "焦虑时的 90 秒方法", desc: "识别情绪→深呼吸→放松扫描" },
+                { img: 32, title: "两分钟自我肯定语", desc: "写下 3 条身体功能感恩" },
+              ]
+            : [
+                { img: 33, title: "身体中立入门", desc: "从功能与健康角度看待身体" },
+                { img: 34, title: "正念饮食 5 步", desc: "慢一点，和味道好好相处" },
+              ];
+        recBox.innerHTML = items
+          .map(
+            (r) => `<div class="bg-white rounded-xl overflow-hidden card-shadow">
+              <img src="https://picsum.photos/400/200?random=${r.img}" alt="${r.title}" class="w-full h-40 object-cover">
+              <div class="p-4">
+                <h4 class="font-semibold mb-1">${r.title}</h4>
+                <p class="text-sm text-gray-500 mb-3 line-clamp-2">${r.desc}</p>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-gray-400">2 分钟阅读</span>
+                  <button class="text-primary text-sm">查看</button>
+                </div>
+              </div>
+            </div>`
+          )
+          .join("");
+      }
+
+      // 首次进入，渲染首页
+      renderHome();
+      renderTRPreview();
+    });
+  </script>
+  <script>
+(function(){
+  const goto = (id) => {
+    // 1) 优先使用你现有的函数（如果存在）
+    if (typeof window.navigateTo === 'function') {
+      window.navigateTo(id);
+    } else if (typeof window.showPage === 'function') {
+      window.showPage(id);
+    } else {
+      // 2) 兜底：简单切换 .page
+      document.querySelectorAll('.page').forEach(s => s.classList.add('hidden'));
+      const t = document.getElementById(id);
+      if (t) t.classList.remove('hidden');
+      window.scrollTo({top:0, behavior:'smooth'});
+      // 如果你有 #pageTitle，可以顺带更新标题
+      const titleEl = document.getElementById('pageTitle');
+      if (titleEl) titleEl.textContent = t?.dataset?.title || titleEl.textContent;
+    }
+
+    // 3) 顶部导航激活态
+    document.querySelectorAll('.top-nav .nav-link').forEach(b => {
+      b.classList.toggle('active', b.dataset.goto === id);
+    });
+  };
+
+  // 绑定点击
+  document.querySelectorAll('.top-nav .nav-link').forEach(b=>{
+    b.addEventListener('click', ()=> goto(b.dataset.goto));
+  });
+
+  // 初始自动高亮（根据当前默认显示的 page）
+  const current = (()=>{
+    // 已显示的页面
+    const shown = [...document.querySelectorAll('.page')].find(s=>!s.classList.contains('hidden'));
+    return shown?.id || 'homePage';
+  })();
+  document.querySelectorAll('.top-nav .nav-link').forEach(b=>{
+    if (b.dataset.goto === current) b.classList.add('active');
+  });
+})();
+</script>
+
+</body>
+</html>
+
+
             if (it.type === "experiment") {
               const e = it.data;
               return `<div class="bg-white rounded-lg p-4 card-shadow">

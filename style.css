@@ -26,3 +26,23 @@ button:hover {
   transform: scale(1.05);
   opacity: 0.9;
 }
+/* === Top Nav (Glass) === */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(255,255,255,.7);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.site-header-inner {
+  max-width: 960px; margin: 0 auto; padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.brand { font-weight: 700; letter-spacing: .2px; color: #0d9488; }
+.top-nav { display: flex; gap: 12px; }
+.top-nav .nav-link {
+  font-size: 14px; color: #6b7280; padding: 6px 10px; border-radius: 999px;
+  transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+.top-nav .nav-link:hover { transform: translateY(-1px); background: rgba(13,148,136,.06); color: #0d9488; }
+.top-nav .nav-link.active { background: rgba(13,148,136,.12); color: #0d9488; }
+.header-spacer { height: 56px; } /* 给正文让位，避免被固定头遮住 */

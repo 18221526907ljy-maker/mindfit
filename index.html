@@ -57,83 +57,30 @@
         @apply text-xs px-2 py-1 rounded-full;
       }
     }
-    <style>
-  /* 固定头部（确保可见且压在最上层） */
-  .site-header {
-    position: fixed; top: 0; left: 0; right: 0;
-    z-index: 2147483647; /* 顶层 */
-    background: rgba(255,255,255,.9);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(0,0,0,.06);
-  }
-  .site-header-inner {
-    max-width: 960px; margin: 0 auto; padding: 10px 16px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .brand { font-weight: 700; color: #0d9488; }
-  .top-nav { display: flex; gap: 12px; }
-  .top-nav .nav-link {
-    font-size: 14px; color: #334155; padding: 6px 10px; border-radius: 999px;
-    transition: background .2s ease, color .2s ease, transform .2s ease;
-  }
-  .top-nav .nav-link:hover { transform: translateY(-1px); background: rgba(13,148,136,.06); color: #0d9488; }
-  .top-nav .nav-link.active { background: rgba(13,148,136,.12); color: #0d9488; }
-
-  /* 兜底：即便 Tailwind 失效，.hidden 也能隐藏其它页面，避免“全露” */
-  .hidden { display: none !important; }
-  /* 美化测评滑杆 */
-input[type="range"] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(to right, #3B82F6, #10B981);
-  outline: none;
-  transition: background 0.3s;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #3B82F6;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #3B82F6;
-  cursor: pointer;
-}
-  
-</style>
-
+  </style>
 </head>
 
 
 <body class="bg-gray-50 font-sans text-dark min-h-screen">
-<!-- 仅保留这一份固定头（放在 <body> 里的第一块） -->
-<header class="site-header">
-  <div class="site-header-inner">
-    <div class="brand">MindFit</div>
-    <nav class="top-nav">
-      <!-- 这些 data-goto 要对应实际页面的 id；没有的可以先删 -->
-      <button class="nav-link" data-goto="homePage">首页</button>
-      <button class="nav-link" data-goto="assessHubPage">测评</button>
-      <button class="nav-link" data-goto="myRecordsPage">我的记录</button>
-    </nav>
-  </div>
-</header>
+  <!-- 顶部导航栏 -->
+  <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+    <div class="flex items-center justify-between px-4 py-3">
+      <div class="flex items-center">
+        <button id="backBtn" class="p-2 text-gray-500 hover:text-primary transition-smooth">
+          <i class="fa fa-arrow-left text-lg"></i>
+        </button>
+        <h1 id="pageTitle" class="text-xl font-medium ml-2">MindFit 身心管理</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button class="p-2 text-gray-500 hover:text-primary transition-smooth" data-target="myRecordsPage">
+          <i class="fa fa-list-alt text-lg"></i>
+        </button>
+        <button class="p-2 text-gray-500 hover:text-primary transition-smooth" data-target="myBadgesPage">
+          <i class="fa fa-star-o text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </header>
 
   <!-- 提示 Toast -->
   <div id="toast" class="fixed left-1/2 -translate-x-1/2 top-16 z-[60] hidden">
@@ -892,10 +839,9 @@ input[type="range"]::-moz-range-thumb {
           qList.innerHTML = QUESTIONS.map((q, i) => {
             return `<div>
                 <label class="block text-sm text-gray-700 mb-1">${i + 1}. ${q}</label>
-               <input type="range" min="1" max="5" value="3" class="w-full accent-primary assess-item" data-idx="${i}">
-<div class="flex justify-between text-xs text-gray-400"><span>1</span><span>5</span></div>
-
-
+                <input type="range" min="1" max="5" value="3" class="w-full h-2 bg-gray-200 rounded-lg accent-primary assess-item" data-idx="${i}">
+                <div class="flex justify-between text-xs text-gray-400"><span>1 从不</span><span>5 总是</span></div>
+              </div>`;
           }).join("");
           qList.dataset.rendered = "1";
         }
@@ -1587,33 +1533,10 @@ input[type="range"]::-moz-range-thumb {
   show(current);
 })();
 </script>
-<script>
-(function(){
-  const pages = Array.from(document.querySelectorAll('.page'));
-  function fallback(id){
-    pages.forEach(p => p.classList.add('hidden'));
-    document.getElementById(id)?.classList.remove('hidden');
-    window.scrollTo({top:0, behavior:'smooth'});
-  }
-  function show(id){
-    if (typeof window.navigateTo === 'function') { try { return window.navigateTo(id); } catch(e){} }
-    if (typeof window.showPage   === 'function') { try { return window.showPage(id);   } catch(e){} }
-    fallback(id);
-    document.querySelectorAll('[data-goto]').forEach(b=>{
-      b.classList.toggle('active', b.getAttribute('data-goto') === id);
-    });
-  }
-  document.querySelectorAll('[data-goto]').forEach(b=>{
-    b.addEventListener('click', ()=> show(b.getAttribute('data-goto')));
-  });
-  const firstShown = pages.find(p=>!p.classList.contains('hidden'))?.id || 'homePage';
-  show(firstShown);
-})();
-</script>
 
 </body>
+</html>
 
 
 </html>
-
 

@@ -59,7 +59,38 @@
     }
   </style>
 </head>
+<!-- 页面内容 -->
 
+<script>
+  // 等待文档加载完成再执行代码
+  document.addEventListener("DOMContentLoaded", () => {
+    // 页面切换逻辑
+    function navigateTo(id) {
+      console.log("Navigating to:", id);
+      pages.forEach((p) => p.classList.add("hidden"));
+      const target = document.getElementById(id);
+      if (!target) return;
+      target.classList.remove("hidden");
+      pageTitle.textContent = titleMap[id] || "MindFit";
+
+      if (pageHistory[pageHistory.length - 1] !== id) {
+        pageHistory.push(id);
+      }
+
+      window.scrollTo(0, 0);
+    }
+
+    // 返回按钮事件绑定
+    document.getElementById("backBtn").addEventListener("click", () => {
+      if (pageHistory.length > 1) {
+        pageHistory.pop();
+        navigateTo(pageHistory[pageHistory.length - 1]);
+      }
+    });
+  });
+</script>
+
+<!-- 页面内容 -->
 
 <body class="bg-gray-50 font-sans text-dark min-h-screen">
   <!-- 顶部导航栏 -->
@@ -1459,84 +1490,4 @@
 </html>
 
 
-
-      // 首次进入，渲染首页
-      renderHome();
-      renderTRPreview();
-    });
-  </script>
-  <script>
-(function(){
-  const goto = (id) => {
-    // 1) 优先使用你现有的函数（如果存在）
-    if (typeof window.navigateTo === 'function') {
-      window.navigateTo(id);
-    } else if (typeof window.showPage === 'function') {
-      window.showPage(id);
-    } else {
-      // 2) 兜底：简单切换 .page
-      document.querySelectorAll('.page').forEach(s => s.classList.add('hidden'));
-      const t = document.getElementById(id);
-      if (t) t.classList.remove('hidden');
-      window.scrollTo({top:0, behavior:'smooth'});
-      // 如果你有 #pageTitle，可以顺带更新标题
-      const titleEl = document.getElementById('pageTitle');
-      if (titleEl) titleEl.textContent = t?.dataset?.title || titleEl.textContent;
-    }
-
-    // 3) 顶部导航激活态
-    document.querySelectorAll('.top-nav .nav-link').forEach(b => {
-      b.classList.toggle('active', b.dataset.goto === id);
-    });
-  };
-
-  // 绑定点击
-  document.querySelectorAll('.top-nav .nav-link').forEach(b=>{
-    b.addEventListener('click', ()=> goto(b.dataset.goto));
-  });
-
-  // 初始自动高亮（根据当前默认显示的 page）
-  const current = (()=>{
-    // 已显示的页面
-    const shown = [...document.querySelectorAll('.page')].find(s=>!s.classList.contains('hidden'));
-    return shown?.id || 'homePage';
-  })();
-  document.querySelectorAll('.top-nav .nav-link').forEach(b=>{
-    if (b.dataset.goto === current) b.classList.add('active');
-  });
-})();
-</script>
-<script>
-(function() {
-  // 兜底：找到所有页面 section（你已有的每个页面都应该带 class="page"）
-  const pages = Array.from(document.querySelectorAll('.page'));
-
-  // 通用显示函数
-  function show(id) {
-    pages.forEach(p => p.classList.add('hidden'));
-    const t = document.getElementById(id);
-    if (t) t.classList.remove('hidden');
-    // 顶部按钮高亮（若你有 data-goto 的按钮）
-    document.querySelectorAll('[data-goto]').forEach(btn=>{
-      btn.classList.toggle('active', btn.getAttribute('data-goto') === id);
-    });
-    window.scrollTo(0,0);
-  }
-
-  // 绑定所有 data-goto 的入口（顶部导航、功能卡片都能用）
-  document.querySelectorAll('[data-goto]').forEach(btn=>{
-    btn.addEventListener('click', ()=> show(btn.getAttribute('data-goto')));
-  });
-
-  // 初始：如果当前已经有某个 .page 没有 hidden，就以它为首页；否则默认 homePage
-  const current = pages.find(p => !p.classList.contains('hidden'))?.id || 'homePage';
-  show(current);
-})();
-</script>
-
-</body>
-</html>
-
-
-</html>
 

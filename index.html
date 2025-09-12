@@ -91,6 +91,16 @@ input[type="range"]::-moz-range-thumb {
   border: 2px solid #3B82F6;
   cursor: pointer;
 }
+    <style>
+/* 结果进度条（不依赖外部库） */
+.result-gauge { background:#f1f5f9; border-radius:999px; height:10px; overflow:hidden; }
+.result-gauge > .bar { height:100%; width:0; background:linear-gradient(90deg,#3B82F6,#10B981); transition:width .6s ease; }
+.result-gauge-label { display:flex; justify-content:space-between; font-size:12px; color:#475569; margin:.5rem 0 .25rem; }
+.badge-chip { display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#4f46e5; margin-left:.5rem; }
+.copy-btn { font-size:12px; color:#2563eb; cursor:pointer; }
+.copy-btn:hover { text-decoration:underline; }
+</style>
+
 
   </style>
 </head>
@@ -100,6 +110,43 @@ input[type="range"]::-moz-range-thumb {
   // 等待文档加载完成再执行代码
   document.addEventListener("DOMContentLoaded", () => {
     // 页面切换逻辑
+    // 生成/更新结果进度条（容器不存在就自动创建）
+function renderGauge(containerId, percent, labelText){
+  const box = document.getElementById(containerId) || (()=>{
+    // 没有容器就自动插到对应结果卡顶部
+    const auto = document.createElement('div');
+    auto.id = containerId;
+    const card = containerId.startsWith('light') ? document.getElementById('lightResult') : document.getElementById('proResult');
+    if(card){ card.prepend(auto); }
+    return auto;
+  })();
+  if(!box) return;
+  box.innerHTML = `
+    <div class="result-gauge-label">
+      <span>${labelText || '综合结果'}</span>
+      <span>${percent}%</span>
+    </div>
+    <div class="result-gauge"><div class="bar" style="width:${percent}%;"></div></div>
+  `;
+}
+// 已有：根据 total 判定 level（低水平/需要关注/优先干预）
+document.getElementById('lightSummary').innerHTML =
+  `焦虑总分：<b>${total}</b>（8–40）｜分级：<span class="badge-chip">${level}</span>｜准备度：<b>${readiness}</b>/5`;
+
+// 通用：把结果卡里的文字建议复制到剪贴板
+function attachCopyAdvice(btnId, adviceContainerId){
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  btn.onclick = async ()=>{
+    const ul = document.getElementById(adviceContainerId);
+    const text = ul ? Array.from(ul.querySelectorAll('li')).map(li=>`• ${li.textContent.trim()}`).join('\n') : '';
+    try{
+      await navigator.clipboard.writeText(text || '（没有可复制的建议）');
+      if(typeof showToast==='function') showToast('已复制到剪贴板'); else alert('已复制到剪贴板');
+    }catch(e){ alert('复制失败，请手动选择复制'); }
+  };
+}
+
     function navigateTo(id) {
       console.log("Navigating to:", id);
       pages.forEach((p) => p.classList.add("hidden"));
@@ -123,6 +170,36 @@ input[type="range"]::-moz-range-thumb {
       }
     });
   });
+  // 1) 进度条：把 8~40 分映射为 0~100%
+const percent = Math.round((total - 8) / 32 * 100);
+renderGauge('lightGauge', percent, '轻测评总览');
+
+// 2) 一键复制建议（按钮不存在就自动生成）
+if(!document.getElementById('lightCopy')){
+  const tools = document.createElement('div');
+  tools.className = 'mt-2';
+  tools.innerHTML = `<span id="lightCopy" class="copy-btn"><i class="fa fa-copy mr-1"></i>复制建议</span>`;
+  document.getElementById('lightResult').prepend(tools);
+}
+attachCopyAdvice('lightCopy','lightAdvice');
+
+// 3) 自动滚动到结果
+document.getElementById('lightResult').scrollIntoView({behavior:'smooth', block:'start'});
+// 1) 进度条：直接用综合分 overall（0~100）
+renderGauge('proGauge', overall, '专业测评综合');
+
+// 2) 一键复制计划
+if(!document.getElementById('proCopy')){
+  const tools = document.createElement('div');
+  tools.className = 'mt-2';
+  tools.innerHTML = `<span id="proCopy" class="copy-btn"><i class="fa fa-copy mr-1"></i>复制小计划</span>`;
+  document.getElementById('proResult').prepend(tools);
+}
+attachCopyAdvice('proCopy','proPlan');
+
+// 3) 自动滚动到结果
+document.getElementById('proResult').scrollIntoView({behavior:'smooth', block:'start'});
+
 </script>
 
 <!-- 页面内容 -->

@@ -1499,6 +1499,48 @@
       renderTRPreview();
     });
   </script>
+  <script>
+(function(){
+  const goto = (id) => {
+    // 1) 优先使用你现有的函数（如果存在）
+    if (typeof window.navigateTo === 'function') {
+      window.navigateTo(id);
+    } else if (typeof window.showPage === 'function') {
+      window.showPage(id);
+    } else {
+      // 2) 兜底：简单切换 .page
+      document.querySelectorAll('.page').forEach(s => s.classList.add('hidden'));
+      const t = document.getElementById(id);
+      if (t) t.classList.remove('hidden');
+      window.scrollTo({top:0, behavior:'smooth'});
+      // 如果你有 #pageTitle，可以顺带更新标题
+      const titleEl = document.getElementById('pageTitle');
+      if (titleEl) titleEl.textContent = t?.dataset?.title || titleEl.textContent;
+    }
+
+    // 3) 顶部导航激活态
+    document.querySelectorAll('.top-nav .nav-link').forEach(b => {
+      b.classList.toggle('active', b.dataset.goto === id);
+    });
+  };
+
+  // 绑定点击
+  document.querySelectorAll('.top-nav .nav-link').forEach(b=>{
+    b.addEventListener('click', ()=> goto(b.dataset.goto));
+  });
+
+  // 初始自动高亮（根据当前默认显示的 page）
+  const current = (()=>{
+    // 已显示的页面
+    const shown = [...document.querySelectorAll('.page')].find(s=>!s.classList.contains('hidden'));
+    return shown?.id || 'homePage';
+  })();
+  document.querySelectorAll('.top-nav .nav-link').forEach(b=>{
+    if (b.dataset.goto === current) b.classList.add('active');
+  });
+})();
+</script>
+
 </body>
 </html>
 

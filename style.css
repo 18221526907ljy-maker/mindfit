@@ -24,9 +24,9 @@
 
 /* 背景渐变 */
 body {
- background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
-
+  background: linear-gradient(to bottom right, #f0f4f8, #e3f2fd);
 }
+
 
 
 

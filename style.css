@@ -10,8 +10,9 @@
 
 /* 背景渐变 */
 body {
-  background: linear-gradient(135deg, #f9f5f2, #e7f0fd);
+  background: linear-gradient(to bottom right, #f0f4f8, #e3f2fd);
 }
+
 
 
 /* 标题颜色 */

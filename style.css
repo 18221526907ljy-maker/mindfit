@@ -10,7 +10,7 @@
 
 /* 背景渐变 */
 body {
-  background: linear-gradient(to bottom right, #f0fdfa, #e0f2fe);
+  background: linear-gradient(135deg, #fef6f9, #e0f2fe);
 }
 
 /* 标题颜色 */

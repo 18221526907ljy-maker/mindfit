@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>测评结果</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🧾 测评结果</h1>
+    <p id="score"></p>
+    <ul id="adviceList"></ul>
+    <a href="index.html">⬅ 返回首页</a>
+  </div>
+
+  <script>
+    const score = localStorage.getItem("assessmentScore");
+    const advice = JSON.parse(localStorage.getItem("assessmentAdvice")) || [];
+
+    document.getElementById("score").innerText = `您的分数为：${score}`;
+    document.getElementById("adviceList").innerHTML = advice.map(item => `<li>${item}</li>`).join('');
+  </script>
+</body>
+</html>

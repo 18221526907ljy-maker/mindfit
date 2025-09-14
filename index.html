@@ -1000,36 +1000,6 @@ document.getElementById('proResult').scrollIntoView({behavior:'smooth', block:'s
 
       document.getElementById("btnAssess").addEventListener("click", () => {
         const db = loadDB();
-        // 分析测评分数，判断身心负荷等级
-function getLevel(score) {
-  if (score <= 20) {
-    return {
-      level: "身心低负荷 ✅",
-      description: "状态平稳，无明显不适。",
-      color: "green"
-    };
-  }
-  if (score <= 35) {
-    return {
-      level: "轻度负荷 ⚠️",
-      description: "出现压力迹象，建议适当介入。",
-      color: "yellow"
-    };
-  }
-  if (score <= 50) {
-    return {
-      level: "中度负荷 ❗",
-      description: "情绪负担明显，建议进行系统调节。",
-      color: "orange"
-    };
-  }
-  return {
-    level: "高度负荷 🚨",
-    description: "建议立即关注身心状况，优先安排训练。",
-    color: "red"
-  };
-}
-
         const vals = [...document.querySelectorAll(".assess-item")].map((x) => Number(x.value));
         if (vals.length !== QUESTIONS.length) {
           showToast("请完成所有题目");
@@ -1043,12 +1013,7 @@ function getLevel(score) {
         const ts = Date.now();
 
         // 生成建议
-        const advice = {
-  cognitive: [],
-  behavioral: [],
-  training: []
-};
-
+        const advice = [];
         if (score >= 30) advice.push("建议优先使用：深呼吸 + 五感觉察，每天 2 次，每次 2 分钟。");
         if (score < 30) advice.push("建议维持：每日 1 次正念呼吸 + 一次自我肯定语。");
         if (bodyFeel === "不自信") advice.push("阅读：身体中立入门，尝试写下 3 条身体功能感恩。");
@@ -1071,15 +1036,9 @@ function getLevel(score) {
         const box = document.getElementById("assessResult");
         const ul = document.getElementById("adviceList");
         ul.innerHTML = advice.map((t) => `<li>${t}</li>`).join("");
-       // 跳转到 result.html 并传递参数
-const query = new URLSearchParams({
-  cognitive: JSON.stringify(advice.cognitive),
-  behavioral: JSON.stringify(advice.behavioral),
-  training: JSON.stringify(advice.training),
-}).toString();
-
-window.location.href = `result.html?${query}`;
-
+        box.classList.remove("hidden");
+        showToast("测评完成，已为你生成建议");
+      });
 
       /*****************
        * 自动思维记录
@@ -1646,56 +1605,8 @@ window.location.href = `result.html?${query}`;
       renderHome();
       renderTRPreview();
     });
-      <!-- ✅ 测评结果显示区域 -->
-<div class="bg-white rounded-xl p-5 card-shadow mb-6">
-  <button id="btnAssess" class="btn-primary">
-    <i class="fa fa-check mr-2"></i> 提交并生成建议
-  </button>
-
-  <div id="assessResult" class="hidden mt-4 border border-gray-100 rounded-lg p-4 bg-gray-50">
-    <p class="text-sm text-gray-600 mb-2">建议 & 今日小任务：</p>
-    <ul id="adviceList" class="list-disc pl-5 space-y-1 text-sm"></ul>
-  </div>
-</div>
-
-<!-- ✅ JavaScript 脚本：挂载点击事件 -->
-<script>
-  function submitAssessment() {
-    const vals = [...document.querySelectorAll(".assess-item")].map((x) => Number(x.value));
-    if (vals.length < 5 || vals.includes(0)) {
-      alert("请完整填写测评分项！");
-      return;
-    }
-
-    const height = parseFloat(document.getElementById("heightInput")?.value) || null;
-    const weight = parseFloat(document.getElementById("weightInput")?.value) || null;
-    const bodyFeel = document.getElementById("bodyFeel")?.value || "";
-
-    const score = vals.reduce((a, b) => a + b, 0);
-    const advice = [];
-
-    // 基于得分和身体感受生成建议
-    if (score >= 30) advice.push("建议优先使用：深呼吸、正念练习、每天 2 次，每次 2 分钟。");
-    if (score < 30) advice.push("建议维持：每日 1 次正念呼吸 + 一次自我肯定语。");
-
-    if (bodyFeel === "不自信") advice.push("阅读：《身体中立入门》，尝试写下 3 条身体功能感恩。");
-    if (bodyFeel === "紧绷") advice.push("今日小任务：4-2-6 呼吸 10 轮，放松肩颈伸展 5 分钟。");
-    if (bodyFeel === "疲惫") advice.push("今日小任务：早点休息，晚上 3 分钟冥想。");
-
-    // 显示建议区域
-    const box = document.getElementById("assessResult");
-    const ul = document.getElementById("adviceList");
-    ul.innerHTML = advice.map((t) => `<li>${t}</li>`).join("");
-    box.classList.remove("hidden");
-  }
-
-  // ✅ 添加按钮点击事件监听器
-  document.getElementById("btnAssess").addEventListener("click", submitAssessment);
-</script>
-
   </script>
 </body>
 </html>
-
 
 

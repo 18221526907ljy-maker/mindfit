@@ -1071,9 +1071,15 @@ function getLevel(score) {
         const box = document.getElementById("assessResult");
         const ul = document.getElementById("adviceList");
         ul.innerHTML = advice.map((t) => `<li>${t}</li>`).join("");
-        box.classList.remove("hidden");
-        showToast("测评完成，已为你生成建议");
-      });
+       // 跳转到 result.html 并传递参数
+const query = new URLSearchParams({
+  cognitive: JSON.stringify(advice.cognitive),
+  behavioral: JSON.stringify(advice.behavioral),
+  training: JSON.stringify(advice.training),
+}).toString();
+
+window.location.href = `result.html?${query}`;
+
 
       /*****************
        * 自动思维记录

@@ -40,6 +40,27 @@
       }
     }
   }
+    <script>
+  // 解析 URL 参数
+  function getQueryParam(key) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(key);
+  }
+
+  // 获取建议内容并显示
+  const adviceStr = getQueryParam("advice"); // URL 里用 , 分隔
+  const adviceList = document.getElementById("adviceList");
+  const adviceBox = document.getElementById("adviceBox");
+
+  if (adviceStr && adviceList) {
+    const adviceArr = decodeURIComponent(adviceStr).split(",,");
+    adviceArr.forEach(text => {
+      const li = document.createElement("li");
+      li.textContent = text;
+      adviceList.appendChild(li);
+    });
+    adviceBox.classList.remove("hidden"); // 显示容器
+  }
 </script>
 
 </body>

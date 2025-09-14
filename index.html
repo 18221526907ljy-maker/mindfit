@@ -1014,8 +1014,7 @@ document.getElementById('proResult').scrollIntoView({behavior:'smooth', block:'s
 
         // 生成建议
         const advice = [];
-       const advice = [];
-
+  
 // 1. 根据总分数，提供整体调节建议
 if (score >= 30) {
   advice.push("🌿 建议维持：你已经表现出良好的调节能力。建议每日 1 次正念呼吸（约 2 分钟），并加入一次自我肯定语练习，例如：“我愿意温柔地对待自己”。");
@@ -1057,6 +1056,7 @@ advice.push("📖 推荐阅读：《为什么我们会对身体感到焦虑》�
           height,
           weight,
           bodyFeel,
+            advice,
         });
         touchStreak(db);
         saveDB(db);

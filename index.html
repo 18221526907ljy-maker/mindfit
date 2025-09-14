@@ -1626,7 +1626,8 @@ window.location.href = `result.html?advice=${adviceStr}`;
                 <p class="text-sm text-gray-500 mb-3 line-clamp-2">${r.desc}</p>
                 <div class="flex items-center justify-between">
                   <span class="text-xs text-gray-400">2 分钟阅读</span>
-                  <button class="text-primary text-sm">查看</button>
+                <a href="${r.link}" class="text-primary text-sm" target="_blank">查看</a>
+
                 </div>
               </div>
             </div>`
@@ -1638,6 +1639,45 @@ window.location.href = `result.html?advice=${adviceStr}`;
       renderHome();
       renderTRPreview();
     });
+    const items = [
+  {
+    title: "身体中立入门",
+    desc: "从功能与健康角度看待身体",
+    img: 1,
+    link: "body-neutrality.html"
+  },
+  {
+    title: "正念饮食 5 步",
+    desc: "慢一点，和味道好好相处",
+    img: 2,
+    link: "mindful-eating.html"
+  },
+  {
+    title: "焦虑舒缓小练习",
+    desc: "3 分钟调节身体紧绷，回归此刻",
+    img: 3,
+    link: "quick-anxiety-relief.html"
+  }
+];
+
+const recBox = document.getElementById("recommendList");
+
+recBox.innerHTML = items
+  .map((r) => `
+    <div class="bg-white rounded-xl overflow-hidden card-shadow">
+      <img src="https://picsum.photos/400/200?random=${r.img}" alt="${r.title}" class="w-full h-40 object-cover">
+      <div class="p-4">
+        <h4 class="font-semibold mb-1">${r.title}</h4>
+        <p class="text-sm text-gray-500 mb-3 line-clamp-2">${r.desc}</p>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400">2 分钟阅读</span>
+          <a href="${r.link}" class="text-primary text-sm" target="_blank">查看</a>
+        </div>
+      </div>
+    </div>
+  `)
+  .join("");
+
   </script>
 </body>
 </html>

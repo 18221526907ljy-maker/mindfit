@@ -1,49 +1,14 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>测评结果 - MindFit</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="style.css" rel="stylesheet" />
+  <title>测评结果页</title>
 </head>
-<body>
-  <main class="p-6">
-    <h1 class="text-2xl font-bold mb-4">🧘 身心测评结果</h1>
-    <section id="results" class="space-y-4">
-      <div>
-        <h2 class="text-lg font-semibold">🧠 认知建议</h2>
-        <ul id="cognitiveList" class="list-disc pl-6 text-sm text-gray-700"></ul>
-      </div>
-      <div>
-        <h2 class="text-lg font-semibold">🧍 行为建议</h2>
-        <ul id="behavioralList" class="list-disc pl-6 text-sm text-gray-700"></ul>
-      </div>
-      <div>
-        <h2 class="text-lg font-semibold">🌿 训练建议</h2>
-        <ul id="trainingList" class="list-disc pl-6 text-sm text-gray-700"></ul>
-      </div>
-    </section>
-    <a href="index.html" class="block mt-8 text-blue-500 underline">返回首页</a>
-  </main>
-
-  <script>
-    // 从 URL 中解析数据
-    const params = new URLSearchParams(window.location.search);
-    const advice = {
-      cognitive: JSON.parse(params.get("cognitive") || "[]"),
-      behavioral: JSON.parse(params.get("behavioral") || "[]"),
-      training: JSON.parse(params.get("training") || "[]"),
-    };
-
-    const renderList = (id, items) => {
-      const ul = document.getElementById(id);
-      if (!ul) return;
-      ul.innerHTML = items.map(item => `<li>${item}</li>`).join("");
-    };
-
-    renderList("cognitiveList", advice.cognitive);
-    renderList("behavioralList", advice.behavioral);
-    renderList("trainingList", advice.training);
-  </script>
+<body style="padding: 2rem; font-family: sans-serif; background-color: #f0f9ff;">
+  <h1 style="color: #0369a1;">✅ 你成功进入了结果页！</h1>
+  <p>这是测试结果页面。接下来我们会一步步把内容填进去。</p>
+  <a href="index.html">← 返回首页</a>
 </body>
 </html>
+

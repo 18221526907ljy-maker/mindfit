@@ -6,45 +6,52 @@
   <title>身体中立入门</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
-<body class="bg-blue-50 min-h-screen text-gray-800">
+<body class="bg-blue-50 min-h-screen">
 
-  <!-- 页面容器 -->
-  <div class="max-w-xl mx-auto p-4">
+  <div class="max-w-xl mx-auto px-4 py-6">
 
-    <!-- 返回按钮 -->
+    <!-- 返回 -->
     <div class="mb-4">
       <a href="index.html" class="text-sm text-blue-600 underline">← 返回</a>
     </div>
 
-    <!-- 卡片样式 -->
-    <div class="bg-white p-6 rounded-xl shadow space-y-4">
+    <!-- 卡片内容 -->
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
 
-      <h1 class="text-2xl font-semibold text-blue-800">🌿 身体中立入门</h1>
-      <p class="text-gray-600 text-sm">从功能与健康角度看待身体</p>
+      <!-- 图片 -->
+      <img src="https://source.unsplash.com/800x400/?wellness,body" alt="身体中立" class="w-full h-48 object-cover" />
 
-      <img src="https://source.unsplash.com/800x400/?body,wellness" alt="身体中立" class="rounded-lg w-full object-cover" />
-
-      <div class="text-sm space-y-4 mt-2">
-
-        <p>身体中立（Body Neutrality）是一种温和的身体观念，它强调身体的功能而非外貌。例如：<em>“我的身体可以让我走路、吃饭、休息和感知世界。”</em></p>
-
-        <p>它不像“身体积极主义”那样要求你喜欢自己身体的每一部分，而是鼓励你减少评判、建立连接。</p>
-
-        <hr class="my-2" />
-
-        <h2 class="font-bold text-blue-700">✅ 开始身体中立的 3 个建议</h2>
-
-        <ul class="list-disc pl-5 space-y-2">
-          <li>记录身体每天帮你完成的 1 件小事（如“今天我的腿带我去散步”）。</li>
-          <li>做 5 分钟身体扫描或腹式呼吸练习，增强身体连接。</li>
-          <li>停止“外貌为主”的评价语言，比如“我今天看起来胖”可以换成“我今天有点疲惫”。</li>
-        </ul>
-
-        <div class="bg-blue-100 p-3 rounded-md border-l-4 border-blue-500 text-sm">
-          📌 温柔提醒：你不需要每天都爱自己的身体，但可以选择每天尊重它。
-        </div>
+      <div class="p-6 space-y-4 text-gray-800 text-[15px] leading-relaxed">
 
         <div>
+          <h1 class="text-xl font-bold text-blue-800 mb-1">🌿 身体中立入门</h1>
+          <p class="text-gray-500 text-sm">从功能与健康角度看待身体</p>
+        </div>
+
+        <p>
+          身体中立（<strong>Body Neutrality</strong>）是一种更温和的身体观念，它强调身体的功能而非外貌。例如：<em>“我的身体可以让我行走、消化、感受。”</em>
+        </p>
+
+        <p>
+          它不像“身体积极主义”那样要求你喜欢自己的外貌，而是鼓励你减少评判，建立连接。
+        </p>
+
+        <div class="border-t pt-4">
+          <h2 class="font-semibold text-blue-700 text-base">✅ 开始身体中立的 3 个建议</h2>
+          <ul class="list-disc pl-5 space-y-1 mt-2">
+            <li>记录身体每天完成的 1 件小事（如“今天我的腿带我去散步”）。</li>
+            <li>做 5 分钟身体扫描或呼吸练习，增强身体连接。</li>
+            <li>避免外貌评价语言，例如“我今天看起来胖” → “我今天有点疲惫”。</li>
+          </ul>
+        </div>
+
+        <!-- 提示 -->
+        <div class="bg-blue-50 p-3 rounded-md border-l-4 border-blue-500 text-sm text-blue-900">
+          📌 <strong>温柔提醒：</strong>你不需要每天都爱自己的身体，但可以选择每天尊重它。
+        </div>
+
+        <!-- 延伸阅读 -->
+        <div class="text-sm pt-2">
           📖 延伸阅读：<br />
           <a href="https://www.health.harvard.edu/mind-and-mood/recognizing-and-easing-the-physical-symptoms-of-anxiety" class="text-blue-600 underline" target="_blank">
             为什么我们会对身体感到焦虑（Harvard Health）
@@ -52,9 +59,7 @@
         </div>
 
       </div>
-
     </div>
-
   </div>
 
 </body>

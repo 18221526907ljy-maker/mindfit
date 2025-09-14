@@ -1045,7 +1045,16 @@ if (bodyFeel === "疲惫") {
 }
 
 // 3. 可选：推荐阅读材料（固定或随机）
-advice.push("📘 推荐阅读: <a href='https://www.medicalnewstoday.com/articles/322510' target='_blank'>《为什么我们会对身体感到焦虑》</a> — 这是一篇简短的心理学文章，帮助你理解身体焦虑的来源。");
+// 3. 可选：推荐📘材料（固定或随机）
+const readings = [
+  "📘 推荐阅读: <a href='https://mp.weixin.qq.com/s/VxXXZlYi9ZaOk3FnSzvUkg' target='_blank'>《为什么我们会对身体感到焦虑》</a> —— 这是一篇简短的心理学文章，帮助你理解身体焦虑的来源。",
+  "📘 推荐阅读: <a href='https://mp.weixin.qq.com/s/4nFkxrmJ61E8Z0U4TfeU0Q' target='_blank'>《如何进行身体扫描冥想》</a> —— 引导你用简单方法放松身心，适合日常练习。",
+  "📘 推荐阅读: <a href='https://mp.weixin.qq.com/s/Rkz0E5BvB1eCZJhlKkLccQ' target='_blank'>《焦虑和身体之间的关系》</a> —— 理解焦虑与身体症状的联系。"
+];
+
+const randomArticle = readings[Math.floor(Math.random() * readings.length)];
+advice.push(randomArticle);
+
 
 
 

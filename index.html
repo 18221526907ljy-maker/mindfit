@@ -1032,6 +1032,8 @@ document.getElementById('proResult').scrollIntoView({behavior:'smooth', block:'s
         saveDB(db);
         unlockBadgesIfNeeded(db);
         renderHome();
+        localStorage.setItem("mindfitAdvice", JSON.stringify(advice));
+
         window.location.href = "result.html";
 
 

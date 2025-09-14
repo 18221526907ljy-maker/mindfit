@@ -34,7 +34,8 @@
     const adviceArr = decodeURIComponent(adviceStr).split(",,");
     adviceArr.forEach(text => {
       const li = document.createElement("li");
-      li.textContent = text;
+     li.innerHTML = text;
+
       adviceList.appendChild(li);
     });
     adviceBox.classList.remove("hidden");

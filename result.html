@@ -17,6 +17,27 @@
 </div>
 
   <a href="index.html">← 返回首页</a>
+  <script>
+  // 获取本地存储
+  const dbRaw = localStorage.getItem("mindfit_db");
+  if (dbRaw) {
+    const db = JSON.parse(dbRaw);
+    const records = db.assessments || [];
+    if (records.length > 0) {
+      const last = records[records.length - 1];
+      const adviceList = last.advice || [];
+
+      // 如果有建议就显示
+      if (adviceList.length > 0) {
+        const box = document.getElementById("adviceBox");
+        const ul = document.getElementById("adviceList");
+        ul.innerHTML = adviceList.map((t) => `<li>${t}</li>`).join("");
+        box.classList.remove("hidden");
+      }
+    }
+  }
+</script>
+
 </body>
 </html>
 
